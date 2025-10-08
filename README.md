@@ -115,11 +115,11 @@ The project follows a **layered architecture** pattern with clear separation of 
 │  ┌───────────────────────────────────────┐  │
 │  │    Controller Layer (REST + WS)       │  │
 │  └──────────────┬────────────────────────┘  │
-│                 ↓                            │
+│                 ↓                           │
 │  ┌───────────────────────────────────────┐  │
 │  │      Service Layer (Business Logic)   │  │
 │  └──────────────┬────────────────────────┘  │
-│                 ↓                            │
+│                 ↓                           │
 │  ┌───────────────────────────────────────┐  │
 │  │   Repository Layer (Data Access)      │  │
 │  └───────────────────────────────────────┘  │
