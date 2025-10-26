@@ -27,23 +27,13 @@ import java.util.List;
 @Builder
 public class ExplosionDTO {
     
-    /**
-     * ID of the bomb that caused this explosion
-     */
     @NotBlank(message = "Explosion ID cannot be blank")
     private String id;
     
-    /**
-     * List of tile coordinates affected by the explosion.
-     * Each Point contains {x, y} grid coordinates.
-     */
     @NotEmpty(message = "Affected tiles list cannot be empty")
     @Valid
     private List<PointDTO> tiles;
     
-    /**
-     * Duration of explosion animation in milliseconds
-     */
     @NotNull(message = "Duration cannot be null")
     @Min(value = 100, message = "Duration must be at least 100ms")
     private Long duration;   

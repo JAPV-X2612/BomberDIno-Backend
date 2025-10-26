@@ -24,28 +24,16 @@ import jakarta.validation.constraints.NotNull;
 @Builder
 public class PowerUpDTO {
     
-    /**
-     * Unique identifier of the power-up (UUID format)
-     */
     @NotBlank(message = "PowerUp ID cannot be blank")
     private String id;
     
-    /**
-     * Type of power-up effect
-     */
     @NotNull(message = "PowerUp type cannot be null")
     private PowerUpType type;
     
-    /**
-     * X coordinate position on the game grid
-     */
     @NotNull(message = "Position X cannot be null")
     @Min(value = 0, message = "Position X must be non-negative")
     private Integer posX;
     
-    /**
-     * Y coordinate position on the game grid
-     */
     @NotNull(message = "Position Y cannot be null")
     @Min(value = 0, message = "Position Y must be non-negative")
     private Integer posY;

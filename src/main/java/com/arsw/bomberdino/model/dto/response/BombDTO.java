@@ -23,42 +23,24 @@ import jakarta.validation.constraints.NotNull;
 @Builder
 public class BombDTO {
     
-    /**
-     * Unique identifier of the bomb (UUID format)
-     */
     @NotBlank(message = "Bomb ID cannot be blank")
     private String id;
     
-    /**
-     * ID of the player who placed the bomb
-     */
     @NotBlank(message = "Owner ID cannot be blank")
     private String ownerId;
     
-    /**
-     * X coordinate position on the game grid
-     */
     @NotNull(message = "Position X cannot be null")
     @Min(value = 0, message = "Position X must be non-negative")
     private Integer posX;
     
-    /**
-     * Y coordinate position on the game grid
-     */
     @NotNull(message = "Position Y cannot be null")
     @Min(value = 0, message = "Position Y must be non-negative")
     private Integer posY;
     
-    /**
-     * Explosion range in tiles (affected radius)
-     */
     @NotNull(message = "Range cannot be null")
     @Min(value = 1, message = "Range must be at least 1")
     private Integer range;
     
-    /**
-     * Timestamp when bomb will explode (epoch milliseconds)
-     */
     @NotNull(message = "Time to explode cannot be null")
     @Min(value = 0, message = "Time to explode must be non-negative")
     private Long timeToExplode;

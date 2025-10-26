@@ -24,28 +24,15 @@ import jakarta.validation.constraints.NotNull;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ErrorResponseDTO {
     
-    /**
-     * HTTP status code or WebSocket error code
-     */
     @NotNull(message = "Status code cannot be null")
     private Integer statusCode;
     
-    /**
-     * Human-readable error message for client display
-     */
     @NotBlank(message = "Error message cannot be blank")
     private String message;
     
-    /**
-     * Machine-readable error code for client-side error handling.
-     * Format: DOMAIN_ERROR_TYPE (e.g., GAME_SESSION_FULL, PLAYER_ALREADY_DEAD)
-     */
     @NotBlank(message = "Error code cannot be blank")
     private String errorCode;
     
-    /**
-     * Timestamp when error occurred (epoch milliseconds)
-     */
     @NotNull(message = "Timestamp cannot be null")
     private Long timeStamp;
     
