@@ -26,7 +26,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 /**
  * Active game session managing gameplay state and entity lifecycle.
  * Thread-safe for concurrent player actions and game loop updates.
- * 
+ *
  * @author Mapunix, Rivaceraptos, Yisus-Rex
  * @version 1.0
  * @since 2025-10-26
@@ -36,52 +36,52 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 @AllArgsConstructor
 @Builder
 public class GameSession {
-    
+
     @NotNull(message = "Session ID cannot be null")
     private UUID sessionId;
-    
+
     @NotBlank(message = "Room code cannot be blank")
     @Size(min = 4, max = 8, message = "Room code must be between 4 and 8 characters")
     private String roomCode;
-    
+
     @NotNull(message = "Game status cannot be null")
     private GameStatus status;
-    
+
     @NotNull(message = "Game map cannot be null")
     @Valid
     private GameMap map;
-    
+
     @NotNull(message = "Players list cannot be null")
     @Valid
     private List<Player> players;
-    
+
     @NotNull(message = "Active bombs list cannot be null")
     @Valid
     private List<Bomb> activeBombs;
-    
+
     @NotNull(message = "Active explosions list cannot be null")
     @Valid
     private List<Explosion> activeExplosions;
-    
+
     @NotNull(message = "Available power-ups list cannot be null")
     @Valid
     private List<PowerUp> availablePowerUps;
-    
+
     private LocalDateTime startTime;
 
     private LocalDateTime endTime;
-    
+
     @Min(value = 60, message = "Round duration must be at least 60 seconds")
     private int roundDuration;
-    
+
     private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
-    
+
     private static final int DEFAULT_ROUND_DURATION = 180;
-    
+
     /**
      * Starts the game session.
      * Initializes start time and changes status to IN_PROGRESS.
-     * 
+     *
      * @throws IllegalStateException if session is not in WAITING or STARTING status
      */
     public void start() {
@@ -90,10 +90,10 @@ public class GameSession {
             if (status != GameStatus.WAITING && status != GameStatus.STARTING) {
                 throw new IllegalStateException("Cannot start session in current status: " + status);
             }
-            
+
             this.status = GameStatus.IN_PROGRESS;
             this.startTime = LocalDateTime.now();
-            
+
             players.forEach(player -> {
                 if (player.getStatus() == com.arsw.bomberdino.model.enums.PlayerStatus.ALIVE) {
                     player.respawn();
@@ -103,39 +103,39 @@ public class GameSession {
             lock.writeLock().unlock();
         }
     }
-    
+
     /**
      * Adds player to the session.
      * Assigns spawn point and initializes player state.
-     * 
+     *
      * @param player player to add
      * @throws IllegalArgumentException if player is null
-     * @throws IllegalStateException if session is full or not in WAITING status
+     * @throws IllegalStateException    if session is full or not in WAITING status
      */
     public void addPlayer(Player player) {
         if (player == null) {
             throw new IllegalArgumentException("Player cannot be null");
         }
-        
+
         lock.writeLock().lock();
         try {
             if (status != GameStatus.WAITING) {
                 throw new IllegalStateException("Cannot add players after session started");
             }
-            
+
             if (players == null) {
                 players = new ArrayList<>();
             }
-            
+
             players.add(player);
         } finally {
             lock.writeLock().unlock();
         }
     }
-    
+
     /**
      * Removes player from the session.
-     * 
+     *
      * @param player player to remove
      * @throws IllegalArgumentException if player is null
      */
@@ -143,11 +143,11 @@ public class GameSession {
         if (player == null) {
             throw new IllegalArgumentException("Player cannot be null");
         }
-        
+
         lock.writeLock().lock();
         try {
             players.remove(player);
-            
+
             if (players.isEmpty() || getAlivePlayers() <= 1) {
                 endSession();
             }
@@ -155,11 +155,11 @@ public class GameSession {
             lock.writeLock().unlock();
         }
     }
-    
+
     /**
      * Updates game state for current frame.
      * Processes bomb explosions, power-up spawning, and win conditions.
-     * 
+     *
      * @param delta time elapsed since last update in seconds
      */
     public void update(float delta) {
@@ -168,7 +168,7 @@ public class GameSession {
             if (status != GameStatus.IN_PROGRESS) {
                 return;
             }
-            
+
             processExpiredBombs();
             processExpiredExplosions();
             processExpiredPowerUps();
@@ -177,10 +177,10 @@ public class GameSession {
             lock.writeLock().unlock();
         }
     }
-    
+
     /**
      * Gets current game state as DTO for client broadcasting.
-     * 
+     *
      * @return GameStateDTO with all relevant session data
      */
     public GameStateDTO getCurrentState() {
@@ -201,19 +201,19 @@ public class GameSession {
     }
 
     private List<PlayerDTO> mapPlayersToDTO() {
-    return players.stream()
-            .map(p -> PlayerDTO.builder()
-                    .id(p.getId().toString())
-                    .username(p.getUsername())
-                    .posX(p.getPosX())
-                    .posY(p.getPosY())
-                    .lifeCount(p.getLifeCount())
-                    .status(p.getStatus())
-                    .kills(p.getKills())
-                    .deaths(p.getDeaths())
-                    .hasShield(p.hasActiveShield())
-                    .build())
-            .toList();
+        return players.stream()
+                .map(p -> PlayerDTO.builder()
+                        .id(p.getId().toString())
+                        .username(p.getUsername())
+                        .posX(p.getPosX())
+                        .posY(p.getPosY())
+                        .lifeCount(p.getLifeCount())
+                        .status(p.getStatus())
+                        .kills(p.getKills())
+                        .deaths(p.getDeaths())
+                        .hasShield(p.hasActiveShield())
+                        .build())
+                .toList();
     }
 
     private List<BombDTO> mapBombsToDTO() {
@@ -235,7 +235,7 @@ public class GameSession {
                     List<PointDTO> affectedPoints = e.getAffectedTiles().stream()
                             .map(t -> new PointDTO(t.getPosX(), t.getPosY()))
                             .toList();
-                    
+
                     return ExplosionDTO.builder()
                             .id(e.getId().toString())
                             .tiles(affectedPoints)
@@ -255,53 +255,52 @@ public class GameSession {
                         .build())
                 .toList();
     }
-    
+
     private void processExpiredBombs() {
         List<Bomb> explodedBombs = new ArrayList<>();
-        
+
         activeBombs.forEach(bomb -> {
             if (bomb.isReadyToExplode()) {
                 Explosion explosion = bomb.explode();
-                explosion.expand(map.getTiles(), bomb.getRange(), bomb.getPosX(), bomb.getPosY());
+                explosion.expand(map.getTiles(), bomb.getRange());
                 explosion.dealDamage();
-                
+
                 activeExplosions.add(explosion);
                 explodedBombs.add(bomb);
-                
+
                 Tile tile = map.getTile(bomb.getPosX(), bomb.getPosY());
                 if (tile != null) {
                     tile.removeBomb();
                 }
             }
         });
-        
+
         activeBombs.removeAll(explodedBombs);
     }
-    
+
     private void processExpiredExplosions() {
-        activeExplosions.removeIf(explosion -> 
-            System.currentTimeMillis() > (explosion.getCreatedAt().atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli() + explosion.getDuration())
-        );
+        activeExplosions.removeIf(explosion -> System.currentTimeMillis() > (explosion.getCreatedAt()
+                .atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli() + explosion.getDuration()));
     }
-    
+
     private void processExpiredPowerUps() {
         availablePowerUps.removeIf(PowerUp::isExpired);
     }
-    
+
     private void checkWinCondition() {
         long alivePlayers = getAlivePlayers();
-        
+
         if (alivePlayers <= 1) {
             endSession();
         }
     }
-    
+
     private long getAlivePlayers() {
         return players.stream()
                 .filter(Player::isAlive)
                 .count();
     }
-    
+
     private void endSession() {
         this.status = GameStatus.FINISHED;
         this.endTime = LocalDateTime.now();
