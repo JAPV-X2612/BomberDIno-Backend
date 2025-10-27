@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.Builder.Default;
 import lombok.experimental.SuperBuilder;
 
 import jakarta.validation.Valid;
@@ -53,7 +54,8 @@ public class Player extends GameEntity implements Movable, Destructible {
     private PlayerStatus status;
 
     @Valid
-    private List<PowerUp> activePowerUps;
+    @Default
+    private List<PowerUp> activePowerUps = new ArrayList<>();
 
     @Min(value = 0, message = "Kills cannot be negative")
     private int kills;
@@ -113,13 +115,6 @@ public class Player extends GameEntity implements Movable, Destructible {
         }
 
         powerUp.applyTo(this);
-
-        if (powerUp.getType() == PowerUpType.TEMPORARY_SHIELD) {
-            if (activePowerUps == null) {
-                activePowerUps = new ArrayList<>();
-            }
-            activePowerUps.add(powerUp);
-        }
     }
 
     /**
