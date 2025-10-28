@@ -4,6 +4,9 @@ import com.arsw.bomberdino.exception.SessionNotFoundException;
 import com.arsw.bomberdino.exception.ValidationException;
 import com.arsw.bomberdino.model.entity.GameMap;
 import com.arsw.bomberdino.model.entity.Tile;
+
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
 
 import java.awt.Point;
@@ -20,6 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @since 2025-10-28
  */
 @Service
+@RequiredArgsConstructor
 public class TileService {
 
     /**

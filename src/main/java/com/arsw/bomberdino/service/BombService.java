@@ -2,6 +2,9 @@ package com.arsw.bomberdino.service;
 
 import com.arsw.bomberdino.model.entity.Bomb;
 import com.arsw.bomberdino.model.enums.BombState;
+
+import lombok.RequiredArgsConstructor;
+
 import com.arsw.bomberdino.exception.ValidationException;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -25,6 +28,7 @@ import java.util.stream.Collectors;
  * @since 2025-10-28
  */
 @Service
+@RequiredArgsConstructor
 public class BombService {
 
     private final CollisionService collisionService;
@@ -42,11 +46,6 @@ public class BombService {
     private final ScheduledExecutorService explosionScheduler = Executors.newScheduledThreadPool(10);
 
     private static final long DEFAULT_EXPLOSION_DELAY = 3000L;
-
-    public BombService(CollisionService collisionService, ApplicationEventPublisher eventPublisher) {
-        this.collisionService = collisionService;
-        this.eventPublisher = eventPublisher;
-    }
 
     /**
      * Places a bomb at the specified position for a player.

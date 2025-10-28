@@ -1,6 +1,9 @@
 package com.arsw.bomberdino.service;
 
 import com.arsw.bomberdino.model.entity.Player;
+
+import lombok.RequiredArgsConstructor;
+
 import com.arsw.bomberdino.model.dto.response.PowerUpEffect;
 import com.arsw.bomberdino.exception.PlayerNotFoundException;
 import com.arsw.bomberdino.exception.ValidationException;
@@ -20,6 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @since 2025-10-28
  */
 @Service
+@RequiredArgsConstructor
 public class PlayerService {
 
     private final ApplicationEventPublisher eventPublisher;
@@ -29,10 +33,6 @@ public class PlayerService {
      * Key: playerId, Value: Player
      */
     private final ConcurrentHashMap<String, Player> players = new ConcurrentHashMap<>();
-
-    public PlayerService(ApplicationEventPublisher eventPublisher) {
-        this.eventPublisher = eventPublisher;
-    }
 
     /**
      * Creates a new player with default attributes.

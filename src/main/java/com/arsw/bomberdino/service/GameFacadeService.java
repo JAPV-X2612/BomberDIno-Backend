@@ -8,6 +8,9 @@ import com.arsw.bomberdino.model.entity.Player;
 import com.arsw.bomberdino.model.entity.PowerUp;
 import com.arsw.bomberdino.model.enums.Direction;
 import com.arsw.bomberdino.model.enums.PlayerStatus;
+
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import com.arsw.bomberdino.exception.*;
@@ -25,6 +28,7 @@ import java.util.List;
  * @since 2025-10-28
  */
 @Service
+@RequiredArgsConstructor
 public class GameFacadeService {
 
     private final GameSessionService gameSessionService;
@@ -34,23 +38,6 @@ public class GameFacadeService {
     private final CollisionService collisionService;
     private final TileService tileService;
     private final ApplicationEventPublisher eventPublisher;
-
-    public GameFacadeService(
-            GameSessionService gameSessionService,
-            PlayerService playerService,
-            BombService bombService,
-            PowerUpService powerUpService,
-            CollisionService collisionService,
-            TileService tileService,
-            ApplicationEventPublisher eventPublisher) {
-        this.gameSessionService = gameSessionService;
-        this.playerService = playerService;
-        this.bombService = bombService;
-        this.powerUpService = powerUpService;
-        this.collisionService = collisionService;
-        this.tileService = tileService;
-        this.eventPublisher = eventPublisher;
-    }
 
     /**
      * Handles player movement request.

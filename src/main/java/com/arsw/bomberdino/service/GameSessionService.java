@@ -5,6 +5,9 @@ import com.arsw.bomberdino.model.entity.GameSession;
 import com.arsw.bomberdino.model.entity.Player;
 import com.arsw.bomberdino.model.enums.GameStatus;
 import com.arsw.bomberdino.model.enums.PlayerStatus;
+
+import lombok.RequiredArgsConstructor;
+
 import com.arsw.bomberdino.exception.ValidationException;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +29,7 @@ import java.util.stream.Collectors;
  * @since 2025-10-28
  */
 @Service
+@RequiredArgsConstructor
 public class GameSessionService {
 
     private final TileService tileService;
@@ -39,11 +43,6 @@ public class GameSessionService {
 
     private static final int DEFAULT_MAX_PLAYERS = 4;
     private static final int DEFAULT_ROUND_DURATION = 180;
-
-    public GameSessionService(TileService tileService, GameMapService gameMapService) {
-        this.tileService = tileService;
-        this.gameMapService = gameMapService;
-    }
 
     /**
      * Creates a new game session from a room.

@@ -3,6 +3,10 @@ package com.arsw.bomberdino.service;
 import com.arsw.bomberdino.model.entity.PowerUp;
 import com.arsw.bomberdino.model.dto.response.PowerUpEffect;
 import com.arsw.bomberdino.model.enums.PowerUpType;
+
+import lombok.RequiredArgsConstructor;
+
+import com.arsw.bomberdino.exception.PowerUpNotFoundException;
 import com.arsw.bomberdino.exception.ValidationException;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -25,6 +29,7 @@ import java.util.stream.Collectors;
  * @since 2025-10-28
  */
 @Service
+@RequiredArgsConstructor
 public class PowerUpService {
 
     private final GameMapService gameMapService;
@@ -42,11 +47,6 @@ public class PowerUpService {
     private final ScheduledExecutorService expirationScheduler = Executors.newScheduledThreadPool(5);
 
     private static final long DEFAULT_POWERUP_DURATION = 30000L;
-
-    public PowerUpService(GameMapService gameMapService, ApplicationEventPublisher eventPublisher) {
-        this.gameMapService = gameMapService;
-        this.eventPublisher = eventPublisher;
-    }
 
     /**
      * Spawns a power-up at the specified position.

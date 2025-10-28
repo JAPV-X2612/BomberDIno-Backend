@@ -3,6 +3,9 @@ package com.arsw.bomberdino.service;
 import com.arsw.bomberdino.model.entity.GameMap;
 import com.arsw.bomberdino.model.entity.Tile;
 import com.arsw.bomberdino.model.enums.TileType;
+
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
 
 import com.arsw.bomberdino.exception.ValidationException;
@@ -24,6 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @since 2025-10-28
  */
 @Service
+@RequiredArgsConstructor
 public class GameMapService {
 
     private static final Random random = new Random();

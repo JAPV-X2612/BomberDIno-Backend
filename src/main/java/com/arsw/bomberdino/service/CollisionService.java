@@ -6,6 +6,9 @@ import com.arsw.bomberdino.model.entity.Player;
 import com.arsw.bomberdino.model.entity.PowerUp;
 import com.arsw.bomberdino.model.entity.Tile;
 import com.arsw.bomberdino.model.enums.TileType;
+
+import lombok.RequiredArgsConstructor;
+
 import com.arsw.bomberdino.exception.ValidationException;
 import org.springframework.stereotype.Service;
 
@@ -23,15 +26,11 @@ import java.util.List;
  * @since 2025-10-28
  */
 @Service
+@RequiredArgsConstructor
 public class CollisionService {
 
     private final TileService tileService;
     private final GameMapService gameMapService;
-
-    public CollisionService(TileService tileService, GameMapService gameMapService) {
-        this.tileService = tileService;
-        this.gameMapService = gameMapService;
-    }
 
     /**
      * Checks if a player can move to the specified position.
