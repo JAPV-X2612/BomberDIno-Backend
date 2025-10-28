@@ -78,7 +78,7 @@ public class GameMap {
 
     /**
      * Gets spawn points that are currently unoccupied.
-     * 
+     *
      * @return list of available spawn Point instances
      */
     public List<Point> getAvailableSpawnPoints() {
@@ -92,7 +92,7 @@ public class GameMap {
 
     /**
      * Finds all empty tiles suitable for power-up spawning.
-     * 
+     *
      * @return list of unoccupied empty tile positions
      */
     public List<Point> getEmptyTilePositions() {
@@ -109,4 +109,5 @@ public class GameMap {
 
         return emptyPositions;
     }
+
 }

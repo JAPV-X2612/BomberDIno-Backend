@@ -6,6 +6,7 @@ import com.arsw.bomberdino.model.dto.response.PointDTO;
 import com.arsw.bomberdino.model.dto.response.GameStateDTO;
 import com.arsw.bomberdino.model.dto.response.PlayerDTO;
 import com.arsw.bomberdino.model.dto.response.PowerUpDTO;
+import com.arsw.bomberdino.model.dto.response.TileDTO;
 import com.arsw.bomberdino.model.enums.GameStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -185,6 +186,7 @@ public class GameSession {
             return GameStateDTO.builder()
                     .sessionId(sessionId.toString())
                     .status(status)
+                    .tiles(mapTilesToDTO())
                     .players(mapPlayersToDTO())
                     .bombs(mapBombsToDTO())
                     .explosions(mapExplosionsToDTO())
@@ -194,6 +196,25 @@ public class GameSession {
         } finally {
             lock.readLock().unlock();
         }
+    }
+
+    private TileDTO[][] mapTilesToDTO() {
+        Tile[][] tiles = map.getTiles();
+        int height = tiles.length;
+        int width = height > 0 ? tiles[0].length : 0;
+
+        TileDTO[][] out = new TileDTO[height][width];
+        for (int y = 0; y < height; y++) {
+            Tile[] row = tiles[y];
+            for (int x = 0; x < width; x++) {
+                out[y][x] = TileDTO.builder()
+                        .x(x)
+                        .y(y)
+                        .type(row[x].getType())
+                        .build();
+            }
+        }
+        return out;
     }
 
     private List<PlayerDTO> mapPlayersToDTO() {
