@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.Builder.Default;
 import lombok.experimental.SuperBuilder;
 
 import jakarta.validation.Valid;
@@ -21,7 +22,7 @@ import java.util.List;
 /**
  * Player entity representing a game participant.
  * Implements movement, bomb placement, and power-up collection.
- * 
+ *
  * @author Mapunix, Rivaceraptos, Yisus-Rex
  * @version 1.0
  * @since 2025-10-26
@@ -32,50 +33,51 @@ import java.util.List;
 @SuperBuilder
 @EqualsAndHashCode(callSuper = true)
 public class Player extends GameEntity implements Movable, Destructible {
-    
+
     @NotBlank(message = "Username cannot be blank")
     @Size(min = 3, max = 20, message = "Username must be between 3 and 20 characters")
     private String username;
-    
+
     @Min(value = 0, message = "Life count cannot be negative")
     private int lifeCount;
-    
+
     @Min(value = 1, message = "Bomb count must be at least 1")
     private int bombCount;
-    
+
     @Min(value = 1, message = "Bomb range must be at least 1")
     private int bombRange;
-    
+
     @Min(value = 1, message = "Speed must be positive")
     private int speed;
-    
+
     @NotNull(message = "Player status cannot be null")
     private PlayerStatus status;
-    
+
     @Valid
-    private List<PowerUp> activePowerUps;
-    
+    @Default
+    private List<PowerUp> activePowerUps = new ArrayList<>();
+
     @Min(value = 0, message = "Kills cannot be negative")
     private int kills;
-    
+
     @Min(value = 0, message = "Deaths cannot be negative")
     private int deaths;
-    
+
     @NotNull(message = "Spawn point cannot be null")
     private Point spawnPoint;
-    
+
     private static final int DEFAULT_LIFE_COUNT = 3;
     private static final int DEFAULT_BOMB_COUNT = 1;
     private static final int DEFAULT_BOMB_RANGE = 2;
     private static final int DEFAULT_SPEED = 1;
-    
+
     /**
      * Places a bomb at player's current position.
-     * 
+     *
      * @param tile the tile where bomb is placed
      * @return Bomb instance if placement successful, null otherwise
      * @throws IllegalArgumentException if tile is null
-     * @throws IllegalStateException if player cannot place bombs
+     * @throws IllegalStateException    if player cannot place bombs
      */
     public Bomb placeBomb(Tile tile) {
         if (tile == null) {
@@ -87,7 +89,7 @@ public class Player extends GameEntity implements Movable, Destructible {
         if (!tile.tryPlaceBomb()) {
             return null;
         }
-        
+
         Bomb bomb = Bomb.builder()
                 .posX(this.posX)
                 .posY(this.posY)
@@ -97,13 +99,13 @@ public class Player extends GameEntity implements Movable, Destructible {
                 .explosionDelay(3000L)
                 .build();
         bomb.initDefaults();
-        
+
         return bomb;
     }
-    
+
     /**
      * Applies power-up effect to player.
-     * 
+     *
      * @param powerUp power-up to apply
      * @throws IllegalArgumentException if powerUp is null
      */
@@ -111,118 +113,117 @@ public class Player extends GameEntity implements Movable, Destructible {
         if (powerUp == null) {
             throw new IllegalArgumentException("PowerUp cannot be null");
         }
-        
+
         powerUp.applyTo(this);
-        
-        if (powerUp.getType() == PowerUpType.TEMPORARY_SHIELD) {
-            if (activePowerUps == null) {
-                activePowerUps = new ArrayList<>();
-            }
-            activePowerUps.add(powerUp);
-        }
     }
-    
+
     /**
      * Kills the player and increments death counter.
      * Changes status to DEAD or SPECTATING based on remaining lives.
      */
     public void die() {
         this.deaths++;
-        
+
         if (isAlive()) {
             this.status = PlayerStatus.DEAD;
         } else {
             this.status = PlayerStatus.SPECTATING;
         }
     }
-    
+
     /**
      * Respawns player at spawn point.
      * Resets position and status to ALIVE.
-     * 
+     *
      * @throws IllegalStateException if player has no lives remaining
      */
     public void respawn() {
         if (!isAlive()) {
             throw new IllegalStateException("Cannot respawn player with no lives remaining");
         }
-        
+
         this.posX = spawnPoint.x;
         this.posY = spawnPoint.y;
         this.status = PlayerStatus.ALIVE;
-        
+
         if (activePowerUps != null) {
             activePowerUps.removeIf(PowerUp::isExpired);
         }
     }
-    
+
     /**
      * Checks if player has lives remaining.
+     *
      * @return true if lifeCount - deaths > 0
      */
     public boolean isAlive() {
         return (lifeCount - deaths) > 0;
     }
-    
+
     /**
      * Checks if player has active shield power-up.
+     *
      * @return true if TEMPORARY_SHIELD is active and not expired
      */
     public boolean hasActiveShield() {
         if (activePowerUps == null || activePowerUps.isEmpty()) {
             return false;
         }
-        
+
         return activePowerUps.stream()
                 .anyMatch(pu -> pu.getType() == PowerUpType.TEMPORARY_SHIELD && !pu.isExpired());
     }
-    
+
     @Override
     public void move(Direction direction) {
         if (direction == null) {
-            throw new IllegalArgumentException("Direction cannot be null");
+            throw new IllegalArgumentException("Direction cannot ser null");
         }
         if (status != PlayerStatus.ALIVE) {
             throw new IllegalStateException("Dead players cannot move");
         }
-        
-        int[] newPos = direction.applyTo(posX, posY);
-        
-        if (canMoveTo(newPos[0], newPos[1])) {
-            this.posX = newPos[0];
-            this.posY = newPos[1];
+
+        Point newPos = direction.applyTo(posX, posY);
+
+        if (newPos == null) {
+            throw new IllegalStateException("Direction.applyTo returned null");
+        }
+
+        if (canMoveTo(newPos.x, newPos.y)) {
+            this.posX = newPos.x;
+            this.posY = newPos.y;
         }
     }
-    
+
     @Override
     public boolean canMoveTo(int posX, int posY) {
         return posX >= 0 && posY >= 0;
     }
-    
+
     @Override
     public int getSpeed() {
         return speed;
     }
-    
+
     @Override
     public void takeDamage(int damage) {
         if (damage < 0) {
             throw new IllegalArgumentException("Damage must be non-negative");
         }
-        
+
         if (hasActiveShield()) {
             activePowerUps.removeIf(p -> p.getType() == PowerUpType.TEMPORARY_SHIELD);
             return;
         }
-        
+
         die();
     }
-    
+
     @Override
     public boolean isDestroyed() {
         return status == PlayerStatus.SPECTATING;
     }
-    
+
     @Override
     public void onDestroy() {
         this.status = PlayerStatus.DISCONNECTED;
