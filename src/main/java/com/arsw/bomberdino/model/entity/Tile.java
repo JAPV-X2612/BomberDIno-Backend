@@ -53,6 +53,8 @@ public class Tile extends GameEntity implements Destructible {
             }
             this.type = TileType.EMPTY;
             this.destructible = false;
+            this.occupied = false;
+            this.hasBomb = false;
         } finally {
             lock.unlock();
         }
@@ -92,7 +94,8 @@ public class Tile extends GameEntity implements Destructible {
             PowerUp powerUp = PowerUp.builder()
                     .posX(this.posX)
                     .posY(this.posY)
-                    .type(PowerUpType.BOMB_COUNT_UP) // For now, always drop BOMB_COUNT_UP - PowerUpType.getRandomType()
+                    .type(PowerUpType.BOMB_COUNT_UP) // For now, always drop BOMB_COUNT_UP -
+                                                     // then PowerUpType.getRandomType()
                     .value(1)
                     .spawnTime(System.currentTimeMillis())
                     .duration(30000L)

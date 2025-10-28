@@ -15,14 +15,14 @@ import lombok.NoArgsConstructor;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+
+import java.awt.Point;
 
 /**
  * Active game session managing gameplay state and entity lifecycle.
@@ -145,7 +145,7 @@ public class GameSession {
         try {
             players.remove(player);
 
-            if (players.isEmpty() || getAlivePlayers() <= 1) {
+            if (players.isEmpty() || getAlivePlayersCount() <= 1) {
                 endSession();
             }
         } finally {
@@ -172,6 +172,24 @@ public class GameSession {
             checkWinCondition();
         } finally {
             lock.writeLock().unlock();
+        }
+    }
+
+    /**
+     * Finds winner when only one player remains alive.
+     *
+     * @return winning Player, or null if no clear winner
+     */
+    public Player getWinner() {
+        lock.readLock().lock();
+        try {
+            List<Player> alivePlayers = players.stream()
+                    .filter(Player::isAlive)
+                    .toList();
+
+            return alivePlayers.size() == 1 ? alivePlayers.get(0) : null;
+        } finally {
+            lock.readLock().unlock();
         }
     }
 
@@ -278,17 +296,19 @@ public class GameSession {
 
         activeBombs.forEach(bomb -> {
             if (bomb.isReadyToExplode()) {
-                Explosion explosion = bomb.explode();
-                explosion.expand(map.getTiles(), bomb.getRange());
-                explosion.dealDamage();
-
-                activeExplosions.add(explosion);
-                explodedBombs.add(bomb);
-
                 Tile tile = map.getTile(bomb.getPosX(), bomb.getPosY());
                 if (tile != null) {
                     tile.removeBomb();
                 }
+
+                Explosion explosion = bomb.explode();
+                explosion.expand(map.getTiles(), bomb.getRange());
+                explosion.dealDamage();
+
+                damagePlayersInExplosion(explosion);
+
+                activeExplosions.add(explosion);
+                explodedBombs.add(bomb);
             }
         });
 
@@ -304,18 +324,46 @@ public class GameSession {
         availablePowerUps.removeIf(PowerUp::isExpired);
     }
 
+    /**
+     * Applies damage to players caught in explosion range.
+     * Respects shield power-up protection.
+     *
+     * @param explosion Explosion entity with affected tiles
+     */
+    private void damagePlayersInExplosion(Explosion explosion) {
+        if (explosion.getAffectedTiles() == null || explosion.getAffectedTiles().isEmpty()) {
+            return;
+        }
+
+        players.forEach(player -> {
+            Point playerPos = new Point(player.getPosX(), player.getPosY());
+
+            boolean isInExplosion = explosion.getAffectedTiles().stream()
+                    .anyMatch(tile -> tile.getPosX() == playerPos.x && tile.getPosY() == playerPos.y);
+
+            if (isInExplosion && player.getStatus() == com.arsw.bomberdino.model.enums.PlayerStatus.ALIVE) {
+                player.takeDamage(explosion.getDamage());
+            }
+        });
+    }
+
     private void checkWinCondition() {
-        long alivePlayers = getAlivePlayers();
+        long alivePlayers = getAlivePlayersCount();
 
         if (alivePlayers <= 1) {
             endSession();
         }
     }
 
-    private long getAlivePlayers() {
-        return players.stream()
-                .filter(Player::isAlive)
-                .count();
+    private long getAlivePlayersCount() {
+        lock.readLock().lock();
+        try {
+            return players.stream()
+                    .filter(Player::isAlive)
+                    .count();
+        } finally {
+            lock.readLock().unlock();
+        }
     }
 
     private void endSession() {

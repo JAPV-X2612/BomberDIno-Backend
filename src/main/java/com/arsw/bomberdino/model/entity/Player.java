@@ -132,6 +132,26 @@ public class Player extends GameEntity implements Movable, Destructible {
     }
 
     /**
+     * Increments kills counter for this player.
+     * Used when player eliminates another player.
+     */
+    public void incrementKills() {
+        this.kills++;
+    }
+
+    /**
+     * Checks if player can place another bomb.
+     *
+     * @param currentBombsPlaced number of bombs currently active for this player
+     * @return true if player has not reached bomb limit
+     */
+    // TODO: Implement bomb placement limit check, could be with a placedBombsCount
+    // field
+    // public boolean canPlaceBomb(int currentBombsPlaced) {
+    // return currentBombsPlaced < bombCount;
+    // }
+
+    /**
      * Respawns player at spawn point.
      * Resets position and status to ALIVE.
      *
@@ -146,9 +166,7 @@ public class Player extends GameEntity implements Movable, Destructible {
         this.posY = spawnPoint.y;
         this.status = PlayerStatus.ALIVE;
 
-        if (activePowerUps != null) {
-            activePowerUps.removeIf(PowerUp::isExpired);
-        }
+        cleanupExpiredPowerUps();
     }
 
     /**
@@ -172,6 +190,16 @@ public class Player extends GameEntity implements Movable, Destructible {
 
         return activePowerUps.stream()
                 .anyMatch(pu -> pu.getType() == PowerUpType.TEMPORARY_SHIELD && !pu.isExpired());
+    }
+
+    /**
+     * Removes expired power-ups from active list.
+     * Called during player update cycle.
+     */
+    public void cleanupExpiredPowerUps() {
+        if (activePowerUps != null) {
+            activePowerUps.removeIf(PowerUp::isExpired);
+        }
     }
 
     @Override
