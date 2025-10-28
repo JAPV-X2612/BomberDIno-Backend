@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
  *
  * @author Mapunix, Rivaceratops, Yisus-Rex
  * @version 1.0
- * @since 2025-10-26
+ * @since 2025-10-28
  */
 @Data
 @NoArgsConstructor
