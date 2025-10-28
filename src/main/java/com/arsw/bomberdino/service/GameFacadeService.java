@@ -8,6 +8,10 @@ import com.arsw.bomberdino.model.entity.Player;
 import com.arsw.bomberdino.model.entity.PowerUp;
 import com.arsw.bomberdino.model.enums.Direction;
 import com.arsw.bomberdino.model.enums.PlayerStatus;
+import com.arsw.bomberdino.model.event.BombExplodedEvent;
+import com.arsw.bomberdino.model.event.GameStateChangedEvent;
+import com.arsw.bomberdino.model.event.PlayerKilledEvent;
+import com.arsw.bomberdino.model.event.PowerUpCollectedEvent;
 
 import lombok.RequiredArgsConstructor;
 
@@ -379,14 +383,16 @@ public class GameFacadeService {
      * Publishes GameStateChangedEvent.
      */
     private void publishGameStateChangedEvent(String sessionId) {
-        // Event implementation will be added later
+        GameStateChangedEvent event = GameStateChangedEvent.of(sessionId);
+        eventPublisher.publishEvent(event);
     }
 
     /**
      * Publishes PlayerKilledEvent.
      */
     private void publishPlayerKilledEvent(String sessionId, String killerId, String victimId) {
-        // Event implementation will be added later
+        PlayerKilledEvent event = PlayerKilledEvent.of(sessionId, killerId, victimId);
+        eventPublisher.publishEvent(event);
     }
 
     /**
@@ -394,7 +400,8 @@ public class GameFacadeService {
      */
     private void publishBombExplodedEvent(String sessionId, String bombId,
             List<Point> affectedTiles, List<String> affectedPlayers) {
-        // Event implementation will be added later
+        BombExplodedEvent event = BombExplodedEvent.of(sessionId, bombId, affectedTiles, affectedPlayers);
+        eventPublisher.publishEvent(event);
     }
 
     /**
@@ -402,7 +409,8 @@ public class GameFacadeService {
      */
     private void publishPowerUpCollectedEvent(String sessionId, String playerId,
             String powerUpId, PowerUpEffect effect) {
-        // Event implementation will be added later
+        PowerUpCollectedEvent event = PowerUpCollectedEvent.of(sessionId, playerId, powerUpId, effect);
+        eventPublisher.publishEvent(event);
     }
 
     /**
