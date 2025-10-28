@@ -40,10 +40,6 @@ public class GameSession {
     @NotNull(message = "Session ID cannot be null")
     private UUID sessionId;
 
-    @NotBlank(message = "Room code cannot be blank")
-    @Size(min = 4, max = 8, message = "Room code must be between 4 and 8 characters")
-    private String roomCode;
-
     @NotNull(message = "Game status cannot be null")
     private GameStatus status;
 

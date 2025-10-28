@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
+import lombok.Builder.Default;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -38,6 +38,11 @@ public class GameRoom {
     @Size(min = 3, max = 50, message = "Room name must be between 3 and 50 characters")
     private String name;
 
+    @NotBlank(message = "Room code cannot be blank")
+    @Size(min = 6, max = 6, message = "Room code must be 6 characters long")
+    @Default
+    private String roomCode = generateRoomCode();
+
     @NotNull(message = "Host user ID cannot be null")
     private UUID hostUserId;
 
@@ -64,7 +69,7 @@ public class GameRoom {
 
     /**
      * Checks if room has reached maximum player capacity.
-     * 
+     *
      * @return true if player count equals maxPlayers
      */
     public boolean isFull() {
@@ -160,7 +165,6 @@ public class GameRoom {
 
             return GameSession.builder()
                     .sessionId(UUID.randomUUID())
-                    .roomCode(generateRoomCode())
                     .status(GameStatus.STARTING)
                     .players(new ArrayList<>())
                     .activeBombs(new ArrayList<>())
@@ -173,7 +177,7 @@ public class GameRoom {
         }
     }
 
-    private String generateRoomCode() {
-        return roomId.toString().substring(0, 8).toUpperCase();
+    public static String generateRoomCode() {
+        return UUID.randomUUID().toString().substring(0, 6).toUpperCase();
     }
 }

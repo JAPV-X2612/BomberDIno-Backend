@@ -15,7 +15,7 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * Tile entity representing a single grid cell on the game map.
  * Thread-safe for concurrent access during gameplay.
- * 
+ *
  * @author Mapunix, Rivaceraptos, Yisus-Rex
  * @version 1.0
  * @since 2025-10-26
@@ -26,7 +26,7 @@ import java.util.concurrent.locks.ReentrantLock;
 @SuperBuilder
 @EqualsAndHashCode(callSuper = true)
 public class Tile extends GameEntity implements Destructible {
-    
+
     @NotNull(message = "Tile type cannot be null")
     private TileType type;
 
@@ -35,14 +35,14 @@ public class Tile extends GameEntity implements Destructible {
     private boolean hasBomb;
 
     private final ReentrantLock lock = new ReentrantLock();
-    
+
     private static final Random random = new Random();
     private static final double POWERUP_DROP_RATE = 0.3;
-    
+
     /**
      * Destroys the tile if destructible.
      * Converts destructible walls to empty tiles.
-     * 
+     *
      * @throws IllegalStateException if tile is not destructible
      */
     public void destroy() {
@@ -57,9 +57,10 @@ public class Tile extends GameEntity implements Destructible {
             lock.unlock();
         }
     }
-    
+
     /**
      * Checks if tile is currently occupied by any entity.
+     *
      * @return true if occupied, false otherwise
      */
     public boolean isOccupied() {
@@ -70,10 +71,10 @@ public class Tile extends GameEntity implements Destructible {
             lock.unlock();
         }
     }
-    
+
     /**
      * Attempts to spawn a power-up on this tile.
-     * 
+     *
      * @return PowerUp instance if dropped, null otherwise
      * @throws IllegalStateException if tile is occupied or not empty
      */
@@ -83,30 +84,31 @@ public class Tile extends GameEntity implements Destructible {
             if (occupied || type != TileType.EMPTY) {
                 throw new IllegalStateException("Cannot drop power-up on occupied or non-empty tile");
             }
-            
+
             if (random.nextDouble() > POWERUP_DROP_RATE) {
                 return null;
             }
-            
+
             PowerUp powerUp = PowerUp.builder()
                     .posX(this.posX)
                     .posY(this.posY)
-                    .type(PowerUpType.getRandomType())
+                    .type(PowerUpType.BOMB_COUNT_UP) // For now, always drop BOMB_COUNT_UP - PowerUpType.getRandomType()
                     .value(1)
                     .spawnTime(System.currentTimeMillis())
                     .duration(30000L)
                     .build();
             powerUp.initDefaults();
-            
+
             this.occupied = true;
             return powerUp;
         } finally {
             lock.unlock();
         }
     }
-    
+
     /**
      * Checks if tile has a bomb placed on it.
+     *
      * @return true if bomb exists on tile
      */
     public boolean hasBomb() {
@@ -117,11 +119,11 @@ public class Tile extends GameEntity implements Destructible {
             lock.unlock();
         }
     }
-    
+
     /**
      * Thread-safe method to place a bomb on this tile.
      * Allows player to place bomb on their current position.
-     * 
+     *
      * @return true if bomb placed successfully, false if tile already has bomb
      */
     public boolean tryPlaceBomb() {
@@ -137,7 +139,7 @@ public class Tile extends GameEntity implements Destructible {
             lock.unlock();
         }
     }
-    
+
     /**
      * Thread-safe method to remove bomb from tile.
      * Called after bomb explodes.
@@ -151,10 +153,10 @@ public class Tile extends GameEntity implements Destructible {
             lock.unlock();
         }
     }
-    
+
     /**
      * Thread-safe method to occupy tile.
-     * 
+     *
      * @param occupy true to occupy, false to free
      * @return true if state changed successfully
      */
@@ -170,7 +172,7 @@ public class Tile extends GameEntity implements Destructible {
             lock.unlock();
         }
     }
-    
+
     @Override
     public void takeDamage(int damage) {
         if (damage < 0) {
@@ -180,12 +182,12 @@ public class Tile extends GameEntity implements Destructible {
             destroy();
         }
     }
-    
+
     @Override
     public boolean isDestroyed() {
         return type == TileType.EMPTY && !destructible;
     }
-    
+
     @Override
     public void onDestroy() {
         lock.lock();
