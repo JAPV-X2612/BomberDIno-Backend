@@ -20,6 +20,13 @@ public class InvalidMoveException extends RuntimeException {
     private final Point targetPosition;
     private final String reason;
 
+    public InvalidMoveException(String playerId, String reason) {
+        super("Invalid move for player " + playerId + ": " + reason);
+        this.playerId = playerId;
+        this.targetPosition = null;
+        this.reason = reason;
+    }
+
     public InvalidMoveException(String playerId, Point targetPosition, String reason) {
         super("Invalid move for player " + playerId + " to position (" +
                 targetPosition.x + ", " + targetPosition.y + "): " + reason);
