@@ -1,7 +1,6 @@
 package com.arsw.bomberdino.model.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -12,8 +11,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Request DTO for creating a new game room.
- * Used by REST API to initialize lobby before game session starts.
+ * Request DTO for creating a new game room. Used by REST API to initialize lobby before game
+ * session starts.
  *
  * @author Mapunix, Rivaceratops, Yisus-Rex
  * @version 1.0

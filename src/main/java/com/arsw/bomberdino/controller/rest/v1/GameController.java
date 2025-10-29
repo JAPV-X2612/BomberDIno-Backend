@@ -1,5 +1,24 @@
 package com.arsw.bomberdino.controller.rest.v1;
 
+import java.awt.Point;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import com.arsw.bomberdino.model.dto.request.CreateRoomRequestDTO;
 import com.arsw.bomberdino.model.dto.request.JoinRoomRequestDTO;
 import com.arsw.bomberdino.model.dto.response.GameRoomDTO;
@@ -7,22 +26,8 @@ import com.arsw.bomberdino.model.entity.GameRoom;
 import com.arsw.bomberdino.model.entity.GameSession;
 import com.arsw.bomberdino.model.enums.GameStatus;
 import com.arsw.bomberdino.service.impl.GameSessionService;
-
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.awt.Point;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 /**
  * REST controller for game room management operations. Handles room creation, joining, listing, and

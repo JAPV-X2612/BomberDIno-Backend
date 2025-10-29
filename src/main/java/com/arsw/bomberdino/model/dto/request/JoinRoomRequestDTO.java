@@ -8,8 +8,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Request DTO for joining an existing game room.
- * Validates player credentials and room accessibility.
+ * Request DTO for joining an existing game room. Validates player credentials and room
+ * accessibility.
  *
  * @author Mapunix, Rivaceratops, Yisus-Rex
  * @version 1.0
