@@ -1,25 +1,26 @@
 package com.arsw.bomberdino.model.entity;
 
-import com.arsw.bomberdino.model.enums.GameStatus;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.Builder.Default;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.locks.ReentrantLock;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.arsw.bomberdino.model.enums.GameStatus;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Builder.Default;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
- * Game room representing lobby before session starts.
- * Manages player joining and session creation.
+ * Game room representing lobby before session starts. Manages player joining and session creation.
  *
  * @author Mapunix, Rivaceraptos, Yisus-Rex
  * @version 1.0
@@ -86,7 +87,7 @@ public class GameRoom {
      *
      * @param userId UUID of player to add
      * @throws IllegalArgumentException if userId is null or blank
-     * @throws IllegalStateException    if room is full or not in WAITING status
+     * @throws IllegalStateException if room is full or not in WAITING status
      */
     public void addPlayer(String userId) {
         if (userId == null || userId.isBlank()) {
@@ -144,8 +145,7 @@ public class GameRoom {
     }
 
     /**
-     * Creates a new game session from this room.
-     * Transitions room status to STARTING.
+     * Creates a new game session from this room. Transitions room status to STARTING.
      *
      * @return new GameSession instance
      * @throws IllegalStateException if room is not ready to start
@@ -163,15 +163,10 @@ public class GameRoom {
 
             this.status = GameStatus.STARTING;
 
-            return GameSession.builder()
-                    .sessionId(UUID.randomUUID())
-                    .status(GameStatus.STARTING)
-                    .players(new ArrayList<>())
-                    .activeBombs(new ArrayList<>())
-                    .activeExplosions(new ArrayList<>())
-                    .availablePowerUps(new ArrayList<>())
-                    .roundDuration(180)
-                    .build();
+            return GameSession.builder().sessionId(UUID.randomUUID()).status(GameStatus.STARTING)
+                    .players(new ArrayList<>()).activeBombs(new ArrayList<>())
+                    .activeExplosions(new ArrayList<>()).availablePowerUps(new ArrayList<>())
+                    .roundDuration(180).build();
         } finally {
             lock.unlock();
         }

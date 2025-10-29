@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -159,7 +158,7 @@ public class GameController {
                     .roomName("Room_" + session.getSessionId().toString().substring(0, 8))
                     .roomCode(session.getSessionId().toString().substring(0, 6).toUpperCase())
                     .status(session.getStatus()).currentPlayers(session.getPlayers().size())
-                    .maxPlayers(4).isPrivate(false).build()).collect(Collectors.toList());
+                    .maxPlayers(4).isPrivate(false).build()).toList();
 
             logger.info("Found {} rooms with status {}", roomDTOs.size(), status);
 
