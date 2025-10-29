@@ -20,8 +20,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Player entity representing a game participant.
- * Implements movement, bomb placement, and power-up collection.
+ * Player entity representing a game participant. Implements movement, bomb
+ * placement, and power-up
+ * collection.
  *
  * @author Mapunix, Rivaceraptos, Yisus-Rex
  * @version 1.0
@@ -57,6 +58,10 @@ public class Player extends GameEntity implements Movable, Destructible {
     @Default
     private List<PowerUp> activePowerUps = new ArrayList<>();
 
+    @Valid
+    @Default
+    private List<Bomb> currentBombsPlaced = new ArrayList<>();
+
     @Min(value = 0, message = "Kills cannot be negative")
     private int kills;
 
@@ -80,6 +85,9 @@ public class Player extends GameEntity implements Movable, Destructible {
      * @throws IllegalStateException    if player cannot place bombs
      */
     public Bomb placeBomb(Tile tile) {
+        if (!canPlaceBomb(currentBombsPlaced.size())) {
+            return null;
+        }
         if (tile == null) {
             throw new IllegalArgumentException("Tile cannot be null");
         }
@@ -90,16 +98,12 @@ public class Player extends GameEntity implements Movable, Destructible {
             return null;
         }
 
-        Bomb bomb = Bomb.builder()
-                .posX(this.posX)
-                .posY(this.posY)
-                .range(this.bombRange)
+        Bomb bomb = Bomb.builder().posX(this.posX).posY(this.posY).range(this.bombRange)
                 .state(com.arsw.bomberdino.model.enums.BombState.PLACED)
-                .placedTime(System.currentTimeMillis())
-                .explosionDelay(3000L)
-                .build();
+                .placedTime(System.currentTimeMillis()).explosionDelay(3000L).build();
         bomb.initDefaults();
 
+        currentBombsPlaced.add(bomb);
         return bomb;
     }
 
@@ -118,8 +122,9 @@ public class Player extends GameEntity implements Movable, Destructible {
     }
 
     /**
-     * Kills the player and increments death counter.
-     * Changes status to DEAD or SPECTATING based on remaining lives.
+     * Kills the player and increments death counter. Changes status to DEAD or
+     * SPECTATING based on
+     * remaining lives.
      */
     public void die() {
         this.deaths++;
@@ -132,8 +137,32 @@ public class Player extends GameEntity implements Movable, Destructible {
     }
 
     /**
-     * Respawns player at spawn point.
-     * Resets position and status to ALIVE.
+     * Increments kills counter for this player. Used when player eliminates another
+     * player.
+     */
+    public void incrementKills() {
+        this.kills++;
+    }
+
+    /**
+     * Checks if player can place another bomb.
+     *
+     * @param currentBombsPlaced number of bombs currently active for this player
+     * @return true if player has not reached bomb limit
+     */
+    public boolean canPlaceBomb(int currentBombsPlaced) {
+        cleanUpPlacedBombs();
+        return currentBombsPlaced < bombCount;
+    }
+
+    public void cleanUpPlacedBombs() {
+        if (currentBombsPlaced != null) {
+            currentBombsPlaced.removeIf(Bomb::isReadyToExplode);
+        }
+    }
+
+    /**
+     * Respawns player at spawn point. Resets position and status to ALIVE.
      *
      * @throws IllegalStateException if player has no lives remaining
      */
@@ -146,9 +175,7 @@ public class Player extends GameEntity implements Movable, Destructible {
         this.posY = spawnPoint.y;
         this.status = PlayerStatus.ALIVE;
 
-        if (activePowerUps != null) {
-            activePowerUps.removeIf(PowerUp::isExpired);
-        }
+        cleanupExpiredPowerUps();
     }
 
     /**
@@ -172,6 +199,16 @@ public class Player extends GameEntity implements Movable, Destructible {
 
         return activePowerUps.stream()
                 .anyMatch(pu -> pu.getType() == PowerUpType.TEMPORARY_SHIELD && !pu.isExpired());
+    }
+
+    /**
+     * Removes expired power-ups from active list. Called during player update
+     * cycle.
+     */
+    public void cleanupExpiredPowerUps() {
+        if (activePowerUps != null) {
+            activePowerUps.removeIf(PowerUp::isExpired);
+        }
     }
 
     @Override

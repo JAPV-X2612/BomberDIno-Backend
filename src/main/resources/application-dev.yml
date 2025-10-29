@@ -1,0 +1,15 @@
+server:
+  port: 8080
+
+spring:
+  devtools:
+    restart:
+      enabled: true
+
+# Development Logging
+logging:
+  level:
+    root: INFO
+    com.arsw.bomberdino: DEBUG
+    org.springframework.web.socket: TRACE
+    org.springframework.messaging: TRACE
