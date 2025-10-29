@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,13 +24,13 @@ import com.arsw.bomberdino.controller.websocket.WebSocketController;
 import com.arsw.bomberdino.model.dto.request.CreateRoomRequestDTO;
 import com.arsw.bomberdino.model.dto.request.JoinRoomRequestDTO;
 import com.arsw.bomberdino.model.dto.response.GameRoomDTO;
-import com.arsw.bomberdino.model.dto.response.GameStateDTO;
 import com.arsw.bomberdino.model.dto.response.PlayerDTO;
 import com.arsw.bomberdino.model.entity.GameRoom;
 import com.arsw.bomberdino.model.entity.GameSession;
 import com.arsw.bomberdino.model.entity.Player;
 import com.arsw.bomberdino.model.enums.GameStatus;
 import com.arsw.bomberdino.service.impl.GameSessionService;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -127,7 +126,7 @@ public class GameController {
             }
 
             Point spawnPoint = availableSpawnPoints.get(0);
-            gameSessionService.addPlayer(sessionId, request.getPlayerId(), spawnPoint);
+            gameSessionService.addPlayer(sessionId, request.getPlayerId(), request.getUsername(), spawnPoint);
 
         //     GameStateDTO currentState = session.getCurrentState();
         // webSocketController.broadcastGameState(sessionId, currentState);
@@ -168,7 +167,7 @@ public class GameController {
 
             List<GameRoomDTO> roomDTOs = sessions.stream().map(session -> GameRoomDTO.builder()
                     .roomId(session.getSessionId().toString())
-                    .roomName("Room_" + session.getSessionId().toString().substring(0, 8))
+                    .roomName("Room_" + session.getSessionId().toString().substring(0, 6))
                     .roomCode(session.getSessionId().toString().substring(0, 6).toUpperCase())
                     .status(session.getStatus()).currentPlayers(getCurrentPlayersDTO(session.getPlayers()))
                     .maxPlayers(4).isPrivate(false).build()).toList();
