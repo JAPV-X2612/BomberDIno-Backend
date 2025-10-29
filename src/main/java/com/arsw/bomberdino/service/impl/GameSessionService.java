@@ -1,5 +1,15 @@
 package com.arsw.bomberdino.service.impl;
 
+import java.awt.Point;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
+import org.springframework.stereotype.Service;
+
+import com.arsw.bomberdino.exception.ValidationException;
 import com.arsw.bomberdino.model.entity.GameMap;
 import com.arsw.bomberdino.model.entity.GameSession;
 import com.arsw.bomberdino.model.entity.Player;
@@ -7,16 +17,6 @@ import com.arsw.bomberdino.model.enums.GameStatus;
 import com.arsw.bomberdino.model.enums.PlayerStatus;
 
 import lombok.RequiredArgsConstructor;
-
-import com.arsw.bomberdino.exception.ValidationException;
-import org.springframework.stereotype.Service;
-
-import java.awt.Point;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Service for managing game sessions lifecycle and state. Handles session creation, player
@@ -183,7 +183,7 @@ public class GameSessionService {
      * @throws ValidationException if parameters are null or blank
      * @throws IllegalStateException if session not found or not in waiting status
      */
-    public Player addPlayer(String sessionId, String playerId, Point spawnPoint) {
+    public Player addPlayer(String sessionId, String playerId, String username, Point spawnPoint) {
         validateSessionId(sessionId);
         validatePlayerId(playerId);
 
@@ -206,7 +206,7 @@ public class GameSessionService {
             playerUuid = UUID.nameUUIDFromBytes(playerId.getBytes());
         }
         Player player = Player.builder().id(playerUuid)
-                .username("Player_" + playerId.substring(0, 8)).posX(spawnPoint.x)
+                .username(username).posX(spawnPoint.x)
                 .posY(spawnPoint.y).lifeCount(3).bombCount(1).bombRange(2).speed(1)
                 .status(PlayerStatus.ALIVE).activePowerUps(new ArrayList<>()).kills(0).deaths(0)
                 .spawnPoint(spawnPoint).build();

@@ -17,10 +17,10 @@ logging:
     console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
 
 cors:
-  allowed-origins: ${CORS_ALLOWED_ORIGINS:https://bomber-dino-frontend-prod.azurewebsites.net}
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:http://bomber-dino-frontend-prod-bxbphmbvcpaugwdr.canadaeast-01.azurewebsites.net}
 
 websocket:
-  allowed-origins: ${WEBSOCKET_ALLOWED_ORIGINS:https://bomber-dino-frontend-prod.azurewebsites.net}
+  allowed-origins: ${WEBSOCKET_ALLOWED_ORIGINS:http://bomber-dino-frontend-prod-bxbphmbvcpaugwdr.canadaeast-01.azurewebsites.net}
   message-size-limit: 65536
   send-buffer-size: 524288
   send-time-limit: 20000
