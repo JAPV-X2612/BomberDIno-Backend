@@ -120,7 +120,7 @@ public class GameController {
             gameSessionService.addPlayer(sessionId, request.getPlayerId(), spawnPoint);
 
             GameRoomDTO roomDTO = GameRoomDTO.builder().roomId(sessionId)
-                    .roomName("Room_" + sessionId.substring(0, 8)).roomCode(request.getRoomId())
+                    .roomName("Room_" + sessionId).roomCode(request.getRoomId())
                     .status(session.getStatus()).currentPlayers(session.getPlayers().size())
                     .maxPlayers(4).isPrivate(false).build();
 

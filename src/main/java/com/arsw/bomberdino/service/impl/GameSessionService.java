@@ -197,7 +197,15 @@ public class GameSessionService {
             throw new IllegalStateException("Can only add players to sessions in WAITING status");
         }
 
-        Player player = Player.builder().id(UUID.fromString(playerId))
+
+        UUID playerUuid;
+        try {
+            playerUuid = UUID.fromString(playerId);
+        } catch (IllegalArgumentException e) {
+            // Si playerId no es UUID, genera uno nuevo basado en el playerId
+            playerUuid = UUID.nameUUIDFromBytes(playerId.getBytes());
+        }
+        Player player = Player.builder().id(playerUuid)
                 .username("Player_" + playerId.substring(0, 8)).posX(spawnPoint.x)
                 .posY(spawnPoint.y).lifeCount(3).bombCount(1).bombRange(2).speed(1)
                 .status(PlayerStatus.ALIVE).activePowerUps(new ArrayList<>()).kills(0).deaths(0)
