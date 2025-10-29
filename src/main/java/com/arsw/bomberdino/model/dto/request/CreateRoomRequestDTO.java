@@ -1,5 +1,7 @@
 package com.arsw.bomberdino.model.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -31,6 +33,7 @@ public class CreateRoomRequestDTO {
     @Max(value = 8, message = "Maximum players cannot exceed 8")
     private int maxPlayers;
 
+    @JsonProperty("isPrivate")
     private boolean isPrivate;
 
     @Size(max = 50, message = "Password cannot exceed 50 characters")

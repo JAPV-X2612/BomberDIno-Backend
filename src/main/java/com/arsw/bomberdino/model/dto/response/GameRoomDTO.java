@@ -30,6 +30,9 @@ public class GameRoomDTO {
     @NotBlank(message = "Room name cannot be blank")
     private String roomName;
 
+    @NotBlank(message = "Room name cannot be blank")
+    private String roomCode;
+
     @NotNull(message = "Status cannot be null")
     private GameStatus status;
 

@@ -62,7 +62,7 @@ public class GameSessionService {
             throw new IllegalStateException("Session already exists for room: " + roomId);
         }
 
-        GameMap map = gameMapService.createMap(roomId, 15, 13);
+        GameMap map = gameMapService.createMap(roomId, 13, 13);
         tileService.initializeTiles(roomId, map);
 
         GameSession session = GameSession.builder()
