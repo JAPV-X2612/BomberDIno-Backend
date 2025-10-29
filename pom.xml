@@ -45,6 +45,12 @@
         <artifactId>spring-boot-starter-actuator</artifactId>
     </dependency>
 
+    <!-- WebSocket Support -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-websocket</artifactId>
+    </dependency>
+
     <!-- Development Tools -->
     <dependency>
         <groupId>org.springframework.boot</groupId>

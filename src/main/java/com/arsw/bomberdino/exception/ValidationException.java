@@ -13,7 +13,6 @@ public class ValidationException extends RuntimeException {
 
     /**
      * Constructor with message only.
-     *
      * @param parameterName name of the invalid parameter
      */
     public ValidationException(String parameterName) {
@@ -45,7 +44,6 @@ public class ValidationException extends RuntimeException {
 
     /**
      * Gets the name of the invalid parameter, if provided.
-     *
      * @return parameter name or null
      */
     public String getParameterName() {

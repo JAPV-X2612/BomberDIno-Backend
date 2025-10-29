@@ -8,6 +8,8 @@ import com.arsw.bomberdino.model.dto.response.PlayerDTO;
 import com.arsw.bomberdino.model.dto.response.PowerUpDTO;
 import com.arsw.bomberdino.model.dto.response.TileDTO;
 import com.arsw.bomberdino.model.enums.GameStatus;
+import com.arsw.bomberdino.model.enums.PlayerStatus;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,8 +27,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.awt.Point;
 
 /**
- * Active game session managing gameplay state and entity lifecycle.
- * Thread-safe for concurrent player actions and game loop updates.
+ * Active game session managing gameplay state and entity lifecycle. Thread-safe for concurrent
+ * player actions and game loop updates.
  *
  * @author Mapunix, Rivaceraptos, Yisus-Rex
  * @version 1.0
@@ -76,8 +78,7 @@ public class GameSession {
     private static final int DEFAULT_ROUND_DURATION = 180;
 
     /**
-     * Starts the game session.
-     * Initializes start time and changes status to IN_PROGRESS.
+     * Starts the game session. Initializes start time and changes status to IN_PROGRESS.
      *
      * @throws IllegalStateException if session is not in WAITING or STARTING status
      */
@@ -85,7 +86,8 @@ public class GameSession {
         lock.writeLock().lock();
         try {
             if (status != GameStatus.WAITING && status != GameStatus.STARTING) {
-                throw new IllegalStateException("Cannot start session in current status: " + status);
+                throw new IllegalStateException(
+                        "Cannot start session in current status: " + status);
             }
 
             this.status = GameStatus.IN_PROGRESS;
@@ -102,12 +104,11 @@ public class GameSession {
     }
 
     /**
-     * Adds player to the session.
-     * Assigns spawn point and initializes player state.
+     * Adds player to the session. Assigns spawn point and initializes player state.
      *
      * @param player player to add
      * @throws IllegalArgumentException if player is null
-     * @throws IllegalStateException    if session is full or not in WAITING status
+     * @throws IllegalStateException if session is full or not in WAITING status
      */
     public void addPlayer(Player player) {
         if (player == null) {
@@ -154,8 +155,8 @@ public class GameSession {
     }
 
     /**
-     * Updates game state for current frame.
-     * Processes bomb explosions, power-up spawning, and win conditions.
+     * Updates game state for current frame. Processes bomb explosions, power-up spawning, and win
+     * conditions.
      *
      * @param delta time elapsed since last update in seconds
      */
@@ -183,9 +184,7 @@ public class GameSession {
     public Player getWinner() {
         lock.readLock().lock();
         try {
-            List<Player> alivePlayers = players.stream()
-                    .filter(Player::isAlive)
-                    .toList();
+            List<Player> alivePlayers = players.stream().filter(Player::isAlive).toList();
 
             return alivePlayers.size() == 1 ? alivePlayers.get(0) : null;
         } finally {
@@ -201,16 +200,10 @@ public class GameSession {
     public GameStateDTO getCurrentState() {
         lock.readLock().lock();
         try {
-            return GameStateDTO.builder()
-                    .sessionId(sessionId.toString())
-                    .status(status)
-                    .tiles(mapTilesToDTO())
-                    .players(mapPlayersToDTO())
-                    .bombs(mapBombsToDTO())
-                    .explosions(mapExplosionsToDTO())
-                    .powerUps(mapPowerUpsToDTO())
-                    .serverTime(System.currentTimeMillis())
-                    .build();
+            return GameStateDTO.builder().sessionId(sessionId.toString()).status(status)
+                    .tiles(mapTilesToDTO()).players(mapPlayersToDTO()).bombs(mapBombsToDTO())
+                    .explosions(mapExplosionsToDTO()).powerUps(mapPowerUpsToDTO())
+                    .serverTime(System.currentTimeMillis()).build();
         } finally {
             lock.readLock().unlock();
         }
@@ -225,11 +218,7 @@ public class GameSession {
         for (int y = 0; y < height; y++) {
             Tile[] row = tiles[y];
             for (int x = 0; x < width; x++) {
-                out[y][x] = TileDTO.builder()
-                        .x(x)
-                        .y(y)
-                        .type(row[x].getType())
-                        .build();
+                out[y][x] = TileDTO.builder().x(x).y(y).type(row[x].getType()).build();
             }
         }
         return out;
@@ -237,60 +226,39 @@ public class GameSession {
 
     private List<PlayerDTO> mapPlayersToDTO() {
         return players.stream()
-                .map(p -> PlayerDTO.builder()
-                        .id(p.getId().toString())
-                        .username(p.getUsername())
-                        .posX(p.getPosX())
-                        .posY(p.getPosY())
-                        .lifeCount(p.getLifeCount())
-                        .status(p.getStatus())
-                        .kills(p.getKills())
-                        .deaths(p.getDeaths())
-                        .hasShield(p.hasActiveShield())
-                        .build())
+                .map(p -> PlayerDTO.builder().id(p.getId().toString()).username(p.getUsername())
+                        .posX(p.getPosX()).posY(p.getPosY()).lifeCount(p.getLifeCount())
+                        .status(p.getStatus()).kills(p.getKills()).deaths(p.getDeaths())
+                        .hasShield(p.hasActiveShield()).build())
                 .toList();
     }
 
     private List<BombDTO> mapBombsToDTO() {
         return activeBombs.stream()
-                .map(b -> BombDTO.builder()
-                        .id(b.getId().toString())
-                        .ownerId(b.getId().toString())
-                        .posX(b.getPosX())
-                        .posY(b.getPosY())
-                        .range(b.getRange())
-                        .timeToExplode(b.getTimeUntilExplosion())
-                        .build())
+                .map(b -> BombDTO.builder().id(b.getId().toString()).ownerId(b.getId().toString())
+                        .posX(b.getPosX()).posY(b.getPosY()).range(b.getRange())
+                        .timeToExplode(b.getTimeUntilExplosion()).build())
                 .toList();
     }
 
     private List<ExplosionDTO> mapExplosionsToDTO() {
-        return activeExplosions.stream()
-                .map(e -> {
-                    List<PointDTO> affectedPoints = e.getAffectedTiles().stream()
-                            .map(t -> new PointDTO(t.getPosX(), t.getPosY()))
-                            .toList();
+        return activeExplosions.stream().map(e -> {
+            List<PointDTO> affectedPoints = e.getAffectedTiles().stream()
+                    .map(t -> new PointDTO(t.getPosX(), t.getPosY())).toList();
 
-                    return ExplosionDTO.builder()
-                            .id(e.getId().toString())
-                            .tiles(affectedPoints)
-                            .duration(e.getDuration())
-                            .build();
-                })
-                .toList();
+            return ExplosionDTO.builder().id(e.getId().toString()).tiles(affectedPoints)
+                    .duration(e.getDuration()).build();
+        }).toList();
     }
 
     private List<PowerUpDTO> mapPowerUpsToDTO() {
-        return availablePowerUps.stream()
-                .map(p -> PowerUpDTO.builder()
-                        .id(p.getId().toString())
-                        .type(p.getType())
-                        .posX(p.getPosX())
-                        .posY(p.getPosY())
-                        .build())
-                .toList();
+        return availablePowerUps.stream().map(p -> PowerUpDTO.builder().id(p.getId().toString())
+                .type(p.getType()).posX(p.getPosX()).posY(p.getPosY()).build()).toList();
     }
 
+    /**
+     * Processes bombs ready to explode. Triggers explosion logic and cleans up exploded bombs.
+     */
     private void processExpiredBombs() {
         List<Bomb> explodedBombs = new ArrayList<>();
 
@@ -316,8 +284,9 @@ public class GameSession {
     }
 
     private void processExpiredExplosions() {
-        activeExplosions.removeIf(explosion -> System.currentTimeMillis() > (explosion.getCreatedAt()
-                .atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli() + explosion.getDuration()));
+        activeExplosions.removeIf(explosion -> System.currentTimeMillis() > (explosion
+                .getCreatedAt().atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()
+                + explosion.getDuration()));
     }
 
     private void processExpiredPowerUps() {
@@ -325,8 +294,7 @@ public class GameSession {
     }
 
     /**
-     * Applies damage to players caught in explosion range.
-     * Respects shield power-up protection.
+     * Applies damage to players caught in explosion range. Respects shield power-up protection.
      *
      * @param explosion Explosion entity with affected tiles
      */
@@ -338,15 +306,18 @@ public class GameSession {
         players.forEach(player -> {
             Point playerPos = new Point(player.getPosX(), player.getPosY());
 
-            boolean isInExplosion = explosion.getAffectedTiles().stream()
-                    .anyMatch(tile -> tile.getPosX() == playerPos.x && tile.getPosY() == playerPos.y);
+            boolean isInExplosion = explosion.getAffectedTiles().stream().anyMatch(
+                    tile -> tile.getPosX() == playerPos.x && tile.getPosY() == playerPos.y);
 
-            if (isInExplosion && player.getStatus() == com.arsw.bomberdino.model.enums.PlayerStatus.ALIVE) {
+            if (isInExplosion && player.getStatus() == PlayerStatus.ALIVE) {
                 player.takeDamage(explosion.getDamage());
             }
         });
     }
 
+    /**
+     * Checks win condition and ends session if met. Win occurs when only one player remains alive.
+     */
     private void checkWinCondition() {
         long alivePlayers = getAlivePlayersCount();
 
@@ -358,9 +329,7 @@ public class GameSession {
     private long getAlivePlayersCount() {
         lock.readLock().lock();
         try {
-            return players.stream()
-                    .filter(Player::isAlive)
-                    .count();
+            return players.stream().filter(Player::isAlive).count();
         } finally {
             lock.readLock().unlock();
         }
@@ -370,4 +339,6 @@ public class GameSession {
         this.status = GameStatus.FINISHED;
         this.endTime = LocalDateTime.now();
     }
+
+
 }

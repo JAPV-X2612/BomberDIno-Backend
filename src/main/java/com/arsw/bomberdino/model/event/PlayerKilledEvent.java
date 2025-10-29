@@ -21,19 +21,8 @@ import java.time.LocalDateTime;
 @Builder
 public class PlayerKilledEvent {
 
-    /**
-     * Unique identifier of the game session where kill occurred.
-     */
     private String sessionId;
-
-    /**
-     * Unique identifier of the player who killed (nullable if suicide/environment).
-     */
     private String killerId;
-
-    /**
-     * Unique identifier of the player who was killed.
-     */
     private String victimId;
 
     /**
@@ -44,7 +33,6 @@ public class PlayerKilledEvent {
 
     /**
      * Checks if the kill was a suicide (player killed themselves).
-     *
      * @return true if killerId equals victimId or killerId is null
      */
     public boolean isSuicide() {

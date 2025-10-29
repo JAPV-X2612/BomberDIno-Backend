@@ -20,8 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Player entity representing a game participant.
- * Implements movement, bomb placement, and power-up collection.
+ * Player entity representing a game participant. Implements movement, bomb placement, and power-up
+ * collection.
  *
  * @author Mapunix, Rivaceraptos, Yisus-Rex
  * @version 1.0
@@ -77,7 +77,7 @@ public class Player extends GameEntity implements Movable, Destructible {
      * @param tile the tile where bomb is placed
      * @return Bomb instance if placement successful, null otherwise
      * @throws IllegalArgumentException if tile is null
-     * @throws IllegalStateException    if player cannot place bombs
+     * @throws IllegalStateException if player cannot place bombs
      */
     public Bomb placeBomb(Tile tile) {
         if (tile == null) {
@@ -90,14 +90,9 @@ public class Player extends GameEntity implements Movable, Destructible {
             return null;
         }
 
-        Bomb bomb = Bomb.builder()
-                .posX(this.posX)
-                .posY(this.posY)
-                .range(this.bombRange)
+        Bomb bomb = Bomb.builder().posX(this.posX).posY(this.posY).range(this.bombRange)
                 .state(com.arsw.bomberdino.model.enums.BombState.PLACED)
-                .placedTime(System.currentTimeMillis())
-                .explosionDelay(3000L)
-                .build();
+                .placedTime(System.currentTimeMillis()).explosionDelay(3000L).build();
         bomb.initDefaults();
 
         return bomb;
@@ -118,8 +113,8 @@ public class Player extends GameEntity implements Movable, Destructible {
     }
 
     /**
-     * Kills the player and increments death counter.
-     * Changes status to DEAD or SPECTATING based on remaining lives.
+     * Kills the player and increments death counter. Changes status to DEAD or SPECTATING based on
+     * remaining lives.
      */
     public void die() {
         this.deaths++;
@@ -132,8 +127,7 @@ public class Player extends GameEntity implements Movable, Destructible {
     }
 
     /**
-     * Increments kills counter for this player.
-     * Used when player eliminates another player.
+     * Increments kills counter for this player. Used when player eliminates another player.
      */
     public void incrementKills() {
         this.kills++;
@@ -145,15 +139,12 @@ public class Player extends GameEntity implements Movable, Destructible {
      * @param currentBombsPlaced number of bombs currently active for this player
      * @return true if player has not reached bomb limit
      */
-    // TODO: Implement bomb placement limit check, could be with a placedBombsCount
-    // field
-    // public boolean canPlaceBomb(int currentBombsPlaced) {
-    // return currentBombsPlaced < bombCount;
-    // }
+    public boolean canPlaceBomb(int currentBombsPlaced) {
+        return currentBombsPlaced < bombCount;
+    }
 
     /**
-     * Respawns player at spawn point.
-     * Resets position and status to ALIVE.
+     * Respawns player at spawn point. Resets position and status to ALIVE.
      *
      * @throws IllegalStateException if player has no lives remaining
      */
@@ -193,8 +184,7 @@ public class Player extends GameEntity implements Movable, Destructible {
     }
 
     /**
-     * Removes expired power-ups from active list.
-     * Called during player update cycle.
+     * Removes expired power-ups from active list. Called during player update cycle.
      */
     public void cleanupExpiredPowerUps() {
         if (activePowerUps != null) {

@@ -6,7 +6,8 @@ import com.arsw.bomberdino.model.dto.response.GameRoomDTO;
 import com.arsw.bomberdino.model.entity.GameRoom;
 import com.arsw.bomberdino.model.entity.GameSession;
 import com.arsw.bomberdino.model.enums.GameStatus;
-import com.arsw.bomberdino.service.GameSessionService;
+import com.arsw.bomberdino.service.impl.GameSessionService;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 

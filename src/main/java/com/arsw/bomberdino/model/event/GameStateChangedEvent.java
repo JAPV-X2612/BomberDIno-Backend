@@ -21,14 +21,8 @@ import java.time.LocalDateTime;
 @Builder
 public class GameStateChangedEvent {
 
-    /**
-     * Unique identifier of the game session where state changed.
-     */
     private String sessionId;
 
-    /**
-     * Timestamp when the state change occurred.
-     */
     @Builder.Default
     private LocalDateTime timestamp = LocalDateTime.now();
 

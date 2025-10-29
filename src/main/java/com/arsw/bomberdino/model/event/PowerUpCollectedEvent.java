@@ -23,35 +23,16 @@ import java.time.LocalDateTime;
 @Builder
 public class PowerUpCollectedEvent {
 
-    /**
-     * Unique identifier of the game session where collection occurred.
-     */
     private String sessionId;
-
-    /**
-     * Unique identifier of the player who collected the power-up.
-     */
     private String playerId;
-
-    /**
-     * Unique identifier of the collected power-up.
-     */
     private String powerUpId;
-
-    /**
-     * Effect applied to the player.
-     */
     private PowerUpEffect effect;
 
-    /**
-     * Timestamp when the collection occurred.
-     */
     @Builder.Default
     private LocalDateTime timestamp = LocalDateTime.now();
 
     /**
      * Gets the type of power-up collected.
-     *
      * @return PowerUpType from the effect
      */
     public PowerUpType getPowerUpType() {
@@ -60,7 +41,6 @@ public class PowerUpCollectedEvent {
 
     /**
      * Checks if the power-up effect is temporary.
-     *
      * @return true if effect has duration > 0
      */
     public boolean isTemporary() {

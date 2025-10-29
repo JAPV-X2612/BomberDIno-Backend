@@ -24,37 +24,20 @@ import java.util.List;
 @Builder
 public class BombExplodedEvent {
 
-    /**
-     * Unique identifier of the game session where explosion occurred.
-     */
     private String sessionId;
-
-    /**
-     * Unique identifier of the bomb that exploded.
-     */
     private String bombId;
 
-    /**
-     * List of tile positions affected by the explosion.
-     */
     @Builder.Default
     private List<Point> affectedTiles = new ArrayList<>();
 
-    /**
-     * List of player IDs damaged by the explosion.
-     */
     @Builder.Default
     private List<String> affectedPlayers = new ArrayList<>();
 
-    /**
-     * Timestamp when the explosion occurred.
-     */
     @Builder.Default
     private LocalDateTime timestamp = LocalDateTime.now();
 
     /**
      * Checks if the explosion affected any players.
-     *
      * @return true if at least one player was affected
      */
     public boolean hasAffectedPlayers() {
@@ -63,7 +46,6 @@ public class BombExplodedEvent {
 
     /**
      * Gets the number of tiles affected by the explosion.
-     *
      * @return count of affected tiles
      */
     public int getAffectedTilesCount() {
