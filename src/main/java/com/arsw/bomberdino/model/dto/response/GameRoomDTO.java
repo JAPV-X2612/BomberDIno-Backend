@@ -1,6 +1,10 @@
 package com.arsw.bomberdino.model.dto.response;
 
+import java.util.List;
+
 import com.arsw.bomberdino.model.enums.GameStatus;
+
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -36,8 +40,9 @@ public class GameRoomDTO {
     @NotNull(message = "Status cannot be null")
     private GameStatus status;
 
-    @Min(value = 0, message = "Current players cannot be negative")
-    private int currentPlayers;
+    @NotNull(message = "Players list cannot be null")
+    @Valid
+    private List<PlayerDTO> currentPlayers;
 
     @Min(value = 2, message = "Max players must be at least 2")
     @Max(value = 8, message = "Max players cannot exceed 8")

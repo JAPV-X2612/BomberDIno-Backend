@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -18,11 +20,16 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.arsw.bomberdino.controller.websocket.WebSocketController;
 import com.arsw.bomberdino.model.dto.request.CreateRoomRequestDTO;
 import com.arsw.bomberdino.model.dto.request.JoinRoomRequestDTO;
 import com.arsw.bomberdino.model.dto.response.GameRoomDTO;
+import com.arsw.bomberdino.model.dto.response.GameStateDTO;
+import com.arsw.bomberdino.model.dto.response.PlayerDTO;
 import com.arsw.bomberdino.model.entity.GameRoom;
 import com.arsw.bomberdino.model.entity.GameSession;
+import com.arsw.bomberdino.model.entity.Player;
 import com.arsw.bomberdino.model.enums.GameStatus;
 import com.arsw.bomberdino.service.impl.GameSessionService;
 import jakarta.validation.Valid;
@@ -45,6 +52,7 @@ public class GameController {
     private static final Logger logger = LoggerFactory.getLogger(GameController.class);
 
     private final GameSessionService gameSessionService;
+    private final WebSocketController webSocketController;
 
     /**
      * Creates a new game room. Initializes room with host player and configuration.
@@ -71,8 +79,10 @@ public class GameController {
 
             GameRoomDTO roomDTO = GameRoomDTO.builder().roomId(roomIdStr).roomName(room.getName())
                     .roomCode(room.getRoomCode()).status(room.getStatus())
-                    .currentPlayers(room.getPlayerIds().size()).maxPlayers(room.getMaxPlayers())
+                    .currentPlayers(getCurrentPlayersDTO(session.getPlayers())).maxPlayers(room.getMaxPlayers())
                     .isPrivate(room.isPrivate()).build();
+
+
 
             logger.info("Room created successfully: {} (session: {})", roomIdStr,
                     session.getSessionId());
@@ -119,9 +129,12 @@ public class GameController {
             Point spawnPoint = availableSpawnPoints.get(0);
             gameSessionService.addPlayer(sessionId, request.getPlayerId(), spawnPoint);
 
+        //     GameStateDTO currentState = session.getCurrentState();
+        // webSocketController.broadcastGameState(sessionId, currentState);
+
             GameRoomDTO roomDTO = GameRoomDTO.builder().roomId(sessionId)
                     .roomName("Room_" + sessionId).roomCode(request.getRoomId())
-                    .status(session.getStatus()).currentPlayers(session.getPlayers().size())
+                    .status(session.getStatus()).currentPlayers(getCurrentPlayersDTO(session.getPlayers()))
                     .maxPlayers(4).isPrivate(false).build();
 
             logger.info("Player {} joined room {} successfully", request.getPlayerId(), sessionId);
@@ -157,7 +170,7 @@ public class GameController {
                     .roomId(session.getSessionId().toString())
                     .roomName("Room_" + session.getSessionId().toString().substring(0, 8))
                     .roomCode(session.getSessionId().toString().substring(0, 6).toUpperCase())
-                    .status(session.getStatus()).currentPlayers(session.getPlayers().size())
+                    .status(session.getStatus()).currentPlayers(getCurrentPlayersDTO(session.getPlayers()))
                     .maxPlayers(4).isPrivate(false).build()).toList();
 
             logger.info("Found {} rooms with status {}", roomDTOs.size(), status);
@@ -204,4 +217,22 @@ public class GameController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
+    private List<PlayerDTO> getCurrentPlayersDTO(List<Player> currentPlayers){
+        return currentPlayers.stream()
+        .map(p -> PlayerDTO.builder()
+                .id(p.getId().toString())
+                .username(p.getUsername())
+                .posX(p.getPosX())
+                .posY(p.getPosY())
+                .lifeCount(p.getLifeCount())
+                .status(p.getStatus())
+                .kills(p.getKills())
+                .deaths(p.getDeaths())
+                .hasShield(p.hasActiveShield())
+                .build())
+        .toList();
+    }
+
+
 }

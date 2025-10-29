@@ -25,6 +25,8 @@ import java.util.List;
 @Builder
 public class GameStateDTO {
 
+
+
     @NotBlank(message = "Session ID cannot be blank")
     private String sessionId;
 

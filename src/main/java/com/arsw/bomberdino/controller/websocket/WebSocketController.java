@@ -4,17 +4,22 @@ import com.arsw.bomberdino.model.dto.request.PlaceBombRequestDTO;
 import com.arsw.bomberdino.model.dto.request.PlayerMoveRequestDTO;
 import com.arsw.bomberdino.model.dto.request.PowerUpCollectRequestDTO;
 import com.arsw.bomberdino.model.dto.response.BombExplodedDTO;
+import com.arsw.bomberdino.model.dto.response.GameStateDTO;
 import com.arsw.bomberdino.model.dto.response.GameStateUpdateDTO;
 import com.arsw.bomberdino.model.dto.response.PlayerKilledDTO;
+import com.arsw.bomberdino.model.entity.GameSession;
 import com.arsw.bomberdino.service.impl.GameFacadeService;
 import com.arsw.bomberdino.service.impl.GameSessionService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.event.EventListener;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.socket.messaging.SessionSubscribeEvent;
 
 /**
  * WebSocket controller for real-time game interactions.
@@ -232,18 +237,13 @@ public class WebSocketController {
      * @param sessionId session identifier
      * @param state     GameStateUpdateDTO to broadcast
      */
-    public void broadcastGameState(String sessionId, GameStateUpdateDTO state) {
+    public void broadcastGameState(String sessionId, GameStateDTO state) {
         try {
-            String destination = "/topic/game/" + sessionId + "/state";
-            messagingTemplate.convertAndSend(destination, state);
-
-            logger.debug("Broadcasted game state to session {} ({} players, {} bombs, {} power-ups)",
-                        sessionId, state.getPlayers().size(),
-                        state.getBombs().size(), state.getPowerUps().size());
-
+            logger.info("🔥 Broadcasting state - Players: {}", state.getPlayers().size());
+            messagingTemplate.convertAndSend("/topic/game/" + sessionId + "/state", state);
+            logger.info("✅ Broadcast successful");
         } catch (Exception e) {
-            logger.error("Error broadcasting game state to session {}: {}",
-                        sessionId, e.getMessage(), e);
+            logger.error("❌ Broadcast failed: {}", e.getMessage(), e);
         }
     }
 
@@ -373,4 +373,22 @@ public class WebSocketController {
         private String message;
         private Long timestamp;
     }
+
+    @EventListener
+public void handleSessionSubscribeEvent(SessionSubscribeEvent event) {
+    StompHeaderAccessor headers = StompHeaderAccessor.wrap(event.getMessage());
+    String destination = headers.getDestination();
+
+    if (destination != null && destination.contains("/topic/game/") && destination.endsWith("/state")) {
+        String sessionId = destination.split("/topic/game/")[1].split("/state")[0];
+
+        try {
+            GameSession session = gameSessionService.getSession(sessionId);
+            GameStateDTO state = session.getCurrentState();
+            broadcastGameState(sessionId, state);
+        } catch (Exception e) {
+            logger.error("Error sending initial state", e);
+        }
+    }
+}
 }
