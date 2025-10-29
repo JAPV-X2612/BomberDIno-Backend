@@ -61,6 +61,7 @@ public class GameSessionService {
 
         GameMap map = gameMapService.createMap(roomId, 13, 13);
         tileService.initializeTiles(roomId, map);
+        UUID id = UUID.randomUUID();
 
         GameSession session = GameSession.builder().sessionId(UUID.randomUUID())
                 .status(GameStatus.WAITING).map(map).players(new ArrayList<>())

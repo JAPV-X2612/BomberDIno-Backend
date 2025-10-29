@@ -61,7 +61,7 @@ public class GameController {
             String roomIdStr = roomId.toString();
 
             GameRoom room = GameRoom.builder().roomId(roomId).name(request.getRoomName())
-                    .roomCode(GameRoom.generateRoomCode()).hostUserId(UUID.randomUUID())
+                    .roomCode(roomIdStr.substring(0,6).toUpperCase()).hostUserId(UUID.randomUUID())
                     .playerIds(new ArrayList<>()).maxPlayers(request.getMaxPlayers())
                     .isPrivate(request.isPrivate()).status(GameStatus.WAITING)
                     .createdAt(LocalDateTime.now()).password(request.getPassword()).build();
