@@ -1,0 +1,17 @@
+server:
+  port: 8080
+
+# Production Logging
+logging:
+  level:
+    root: WARN
+    com.arsw.bomberdino: INFO
+    org.springframework.web.socket: INFO
+    org.springframework.messaging: INFO
+
+# Production Game Settings
+game:
+  bomb:
+    scheduler-pool-size: 20
+  powerup:
+    scheduler-pool-size: 10

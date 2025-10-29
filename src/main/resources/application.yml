@@ -1,0 +1,66 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /
+
+spring:
+  application:
+    name: bomberdino-backend
+
+  # Jackson Configuration
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+      indent-output: true
+    default-property-inclusion: non_null
+
+  # Task Execution (Async)
+  task:
+    execution:
+      pool:
+        core-size: 10
+        max-size: 20
+        queue-capacity: 100
+      thread-name-prefix: async-task-
+
+# Game Configuration
+game:
+  bomb:
+    default-explosion-delay: 3000
+    scheduler-pool-size: 10
+  powerup:
+    default-duration: 30000
+    scheduler-pool-size: 5
+  map:
+    default-width: 12
+    default-height: 12
+  session:
+    round-duration: 180
+    max-players: 4
+
+# WebSocket Configuration
+websocket:
+  broker-prefix: /topic
+  app-prefix: /app
+  endpoint: /ws
+  allowed-origins: '*'
+
+# Actuator Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+
+# Logging Configuration
+logging:
+  level:
+    root: INFO
+    com.arsw.bomberdino: DEBUG
+    org.springframework.web.socket: DEBUG
+    org.springframework.messaging: DEBUG
+  pattern:
+    console: '%d{yyyy-MM-dd HH:mm:ss} - %msg%n'
