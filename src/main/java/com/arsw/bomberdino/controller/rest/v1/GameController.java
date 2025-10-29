@@ -24,6 +24,7 @@ import com.arsw.bomberdino.controller.websocket.WebSocketController;
 import com.arsw.bomberdino.model.dto.request.CreateRoomRequestDTO;
 import com.arsw.bomberdino.model.dto.request.JoinRoomRequestDTO;
 import com.arsw.bomberdino.model.dto.response.GameRoomDTO;
+import com.arsw.bomberdino.model.dto.response.GameStateDTO;
 import com.arsw.bomberdino.model.dto.response.PlayerDTO;
 import com.arsw.bomberdino.model.entity.GameRoom;
 import com.arsw.bomberdino.model.entity.GameSession;
@@ -35,8 +36,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 /**
- * REST controller for game room management operations. Handles room creation, joining, listing, and
- * player disconnection.
+ * REST controller for game room management operations. Handles room creation,
+ * joining, listing, and player disconnection.
  *
  * @author Mapunix, Rivaceratops, Yisus-Rex
  * @version 1.0
@@ -54,7 +55,8 @@ public class GameController {
     private final WebSocketController webSocketController;
 
     /**
-     * Creates a new game room. Initializes room with host player and configuration.
+     * Creates a new game room. Initializes room with host player and
+     * configuration.
      *
      * @param request CreateRoomRequestDTO with room configuration
      * @return ResponseEntity with GameRoomDTO containing room details
@@ -73,15 +75,13 @@ public class GameController {
                     .isPrivate(request.isPrivate()).status(GameStatus.WAITING)
                     .createdAt(LocalDateTime.now()).password(request.getPassword()).build();
 
-            GameSession session =
-                    gameSessionService.createSession(roomCode, request.getMaxPlayers());
+            GameSession session
+                    = gameSessionService.createSession(roomCode, request.getMaxPlayers());
 
             GameRoomDTO roomDTO = GameRoomDTO.builder().roomId(roomIdStr).roomName(room.getName())
                     .roomCode(room.getRoomCode()).status(room.getStatus())
                     .currentPlayers(getCurrentPlayersDTO(session.getPlayers())).maxPlayers(room.getMaxPlayers())
                     .isPrivate(room.isPrivate()).build();
-
-
 
             logger.info("Room created successfully: {} (session: {})", roomIdStr,
                     session.getSessionId());
@@ -98,8 +98,8 @@ public class GameController {
     }
 
     /**
-     * Allows a player to join an existing room. Validates room availability and password if
-     * private.
+     * Allows a player to join an existing room. Validates room availability and
+     * password if private.
      *
      * @param request JoinRoomRequestDTO with room and player details
      * @return ResponseEntity with GameRoomDTO containing updated room state
@@ -128,8 +128,8 @@ public class GameController {
             Point spawnPoint = availableSpawnPoints.get(0);
             gameSessionService.addPlayer(sessionId, request.getPlayerId(), request.getUsername(), spawnPoint);
 
-        //     GameStateDTO currentState = session.getCurrentState();
-        // webSocketController.broadcastGameState(sessionId, currentState);
+            GameStateDTO currentState = session.getCurrentState();
+            webSocketController.broadcastGameState(sessionId, currentState);
 
             GameRoomDTO roomDTO = GameRoomDTO.builder().roomId(sessionId)
                     .roomName("Room_" + sessionId).roomCode(request.getRoomId())
@@ -153,7 +153,8 @@ public class GameController {
     }
 
     /**
-     * Retrieves all rooms matching a specific status. Used for lobby listing and room browser.
+     * Retrieves all rooms matching a specific status. Used for lobby listing
+     * and room browser.
      *
      * @param status GameStatus to filter by
      * @return ResponseEntity with list of GameRoomDTO
@@ -185,8 +186,40 @@ public class GameController {
         }
     }
 
+    @PostMapping("/rooms/{sessionId}/start")
+    public ResponseEntity<Void> startGame(
+            @PathVariable String sessionId,
+            @RequestParam String playerId) {
+
+        logger.info("Player {} initiating game start for session {}", playerId, sessionId);
+
+        try {
+            GameSession session = gameSessionService.getSession(sessionId);
+
+            // Validar que hay suficientes jugadores
+            if (session.getPlayers().size() < 2) {
+                return ResponseEntity.badRequest().build();
+            }
+
+            // Cambiar estado a RUNNING
+            session.setStatus(GameStatus.IN_PROGRESS);
+
+            // Notificar a todos los jugadores vía WebSocket
+            GameStateDTO state = session.getCurrentState();
+            webSocketController.broadcastGameStart(sessionId, state);
+
+            logger.info("Game started for session {}", sessionId);
+            return ResponseEntity.ok().build();
+
+        } catch (Exception e) {
+            logger.error("Error starting game: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
     /**
-     * Removes a player from a room. Handles graceful disconnection and lobby cleanup.
+     * Removes a player from a room. Handles graceful disconnection and lobby
+     * cleanup.
      *
      * @param sessionId session identifier
      * @param playerId player identifier to remove
@@ -217,9 +250,9 @@ public class GameController {
         }
     }
 
-    private List<PlayerDTO> getCurrentPlayersDTO(List<Player> currentPlayers){
+    private List<PlayerDTO> getCurrentPlayersDTO(List<Player> currentPlayers) {
         return currentPlayers.stream()
-        .map(p -> PlayerDTO.builder()
+                .map(p -> PlayerDTO.builder()
                 .id(p.getId().toString())
                 .username(p.getUsername())
                 .posX(p.getPosX())
@@ -230,8 +263,7 @@ public class GameController {
                 .deaths(p.getDeaths())
                 .hasShield(p.hasActiveShield())
                 .build())
-        .toList();
+                .toList();
     }
-
 
 }
