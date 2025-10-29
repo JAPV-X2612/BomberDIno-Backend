@@ -59,15 +59,16 @@ public class GameController {
         try {
             UUID roomId = UUID.randomUUID();
             String roomIdStr = roomId.toString();
+            String roomCode = roomId.toString().substring(0, 6).toUpperCase(); // 👈 Código corto
 
             GameRoom room = GameRoom.builder().roomId(roomId).name(request.getRoomName())
-                    .roomCode(roomIdStr.substring(0,6).toUpperCase()).hostUserId(UUID.randomUUID())
+                    .roomCode(roomCode)
                     .playerIds(new ArrayList<>()).maxPlayers(request.getMaxPlayers())
                     .isPrivate(request.isPrivate()).status(GameStatus.WAITING)
                     .createdAt(LocalDateTime.now()).password(request.getPassword()).build();
 
             GameSession session =
-                    gameSessionService.createSession(roomIdStr, request.getMaxPlayers());
+                    gameSessionService.createSession(roomCode, request.getMaxPlayers());
 
             GameRoomDTO roomDTO = GameRoomDTO.builder().roomId(roomIdStr).roomName(room.getName())
                     .roomCode(room.getRoomCode()).status(room.getStatus())
