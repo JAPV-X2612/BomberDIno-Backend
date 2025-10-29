@@ -8,7 +8,6 @@ import com.arsw.bomberdino.model.entity.Player;
 import com.arsw.bomberdino.model.entity.PowerUp;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Mapper utility for converting game entities to DTOs. Centralizes entity-to-DTO conversion logic.

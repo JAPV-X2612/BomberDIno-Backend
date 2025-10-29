@@ -26,9 +26,8 @@ import java.awt.Point;
 import java.util.List;
 
 /**
- * Facade service orchestrating all game operations.
- * Single entry point for WebSocket controllers handling player actions.
- * Coordinates between multiple services and publishes domain events.
+ * Facade service orchestrating all game operations. Single entry point for WebSocket controllers
+ * handling player actions. Coordinates between multiple services and publishes domain events.
  *
  * @author Mapunix, Rivaceratops, Yisus-Rex
  * @version 1.0
@@ -47,20 +46,20 @@ public class GameFacadeService {
     private final ApplicationEventPublisher eventPublisher;
 
     /**
-     * Handles player movement request.
-     * Validates movement, updates tile occupation, and publishes state change
-     * event.
+     * Handles player movement request. Validates movement, updates tile occupation, and publishes
+     * state change event.
      *
      * @param sessionId unique identifier of the game session
-     * @param playerId  unique identifier of the player
+     * @param playerId unique identifier of the player
      * @param direction direction to move (UP, DOWN, LEFT, RIGHT)
      * @return GameStateUpdateDTO with updated game state
-     * @throws ValidationException      if parameters are null or blank
-     * @throws PlayerNotFoundException  if player is not found in session
+     * @throws ValidationException if parameters are null or blank
+     * @throws PlayerNotFoundException if player is not found in session
      * @throws SessionNotFoundException if session is not found
-     * @throws InvalidMoveException     if movement is invalid
+     * @throws InvalidMoveException if movement is invalid
      */
-    public GameStateUpdateDTO handlePlayerMove(String sessionId, String playerId, Direction direction) {
+    public GameStateUpdateDTO handlePlayerMove(String sessionId, String playerId,
+            Direction direction) {
         validateSessionId(sessionId);
         validatePlayerId(playerId);
         validateDirection(direction);
@@ -77,7 +76,8 @@ public class GameFacadeService {
         Point newPosition = direction.applyTo(player.getPosX(), player.getPosY());
 
         if (!collisionService.canMoveTo(sessionId, newPosition)) {
-            throw new InvalidMoveException(playerId, newPosition, "Destination tile is not walkable or is occupied");
+            throw new InvalidMoveException(playerId, newPosition,
+                    "Destination tile is not walkable or is occupied");
         }
 
         tileService.releaseOccupation(sessionId, currentPosition);
@@ -85,7 +85,8 @@ public class GameFacadeService {
         boolean occupationSuccess = tileService.tryOccupy(sessionId, newPosition, false);
         if (!occupationSuccess) {
             tileService.tryOccupy(sessionId, currentPosition, false);
-            throw new InvalidMoveException(playerId, newPosition, "Failed to occupy destination tile");
+            throw new InvalidMoveException(playerId, newPosition,
+                    "Failed to occupy destination tile");
         }
 
         player.setPosX(newPosition.x);
@@ -102,18 +103,17 @@ public class GameFacadeService {
     }
 
     /**
-     * Handles bomb placement request.
-     * Validates placement, marks tile, schedules explosion, and publishes state
-     * change.
+     * Handles bomb placement request. Validates placement, marks tile, schedules explosion, and
+     * publishes state change.
      *
      * @param sessionId unique identifier of the game session
-     * @param playerId  unique identifier of the player
-     * @param position  coordinates where bomb should be placed
+     * @param playerId unique identifier of the player
+     * @param position coordinates where bomb should be placed
      * @return GameStateUpdateDTO with updated game state
-     * @throws ValidationException      if parameters are null or blank
-     * @throws PlayerNotFoundException  if the player does not exist
+     * @throws ValidationException if parameters are null or blank
+     * @throws PlayerNotFoundException if the player does not exist
      * @throws SessionNotFoundException if the session does not exist
-     * @throws BombPlacementException   if bomb placement fails
+     * @throws BombPlacementException if bomb placement fails
      */
     public GameStateUpdateDTO handlePlaceBomb(String sessionId, String playerId, Point position) {
         validateSessionId(sessionId);
@@ -129,7 +129,8 @@ public class GameFacadeService {
 
         Point playerPosition = new Point(player.getPosX(), player.getPosY());
         if (!playerPosition.equals(position)) {
-            throw new BombPlacementException(playerId, position, "Bomb must be placed at player's current position");
+            throw new BombPlacementException(playerId, position,
+                    "Bomb must be placed at player's current position");
         }
 
         if (tileService.getTile(sessionId, position).hasBomb()) {
@@ -150,21 +151,20 @@ public class GameFacadeService {
     }
 
     /**
-     * Handles power-up collection request.
-     * Validates collection, applies effect to player, removes power-up, and
-     * publishes events.
+     * Handles power-up collection request. Validates collection, applies effect to player, removes
+     * power-up, and publishes events.
      *
      * @param sessionId unique identifier of the game session
-     * @param playerId  unique identifier of the player
+     * @param playerId unique identifier of the player
      * @param powerUpId unique identifier of the power-up to collect
      * @return GameStateUpdateDTO with updated game state
-     * @throws ValidationException      if parameters are null or blank
-     * @throws PlayerNotFoundException  if the player does not exist
+     * @throws ValidationException if parameters are null or blank
+     * @throws PlayerNotFoundException if the player does not exist
      * @throws SessionNotFoundException if the session does not exist
-     * @throws PowerUpNotFoundException if the power-up does not exist or has
-     *                                  expired
+     * @throws PowerUpNotFoundException if the power-up does not exist or has expired
      */
-    public GameStateUpdateDTO handlePowerUpCollection(String sessionId, String playerId, String powerUpId) {
+    public GameStateUpdateDTO handlePowerUpCollection(String sessionId, String playerId,
+            String powerUpId) {
         validateSessionId(sessionId);
         validatePlayerId(playerId);
         validatePowerUpId(powerUpId);
@@ -172,8 +172,7 @@ public class GameFacadeService {
         GameSession session = gameSessionService.getSession(sessionId);
 
         PowerUp powerUp = session.getAvailablePowerUps().stream()
-                .filter(pu -> pu.getId().toString().equals(powerUpId))
-                .findFirst()
+                .filter(pu -> pu.getId().toString().equals(powerUpId)).findFirst()
                 .orElseThrow(() -> new PowerUpNotFoundException(powerUpId, sessionId));
 
         if (powerUp.isExpired()) {
@@ -194,12 +193,12 @@ public class GameFacadeService {
     }
 
     /**
-     * Retrieves current game state for a session.
-     * Creates GameStateUpdateDTO with all active entities.
+     * Retrieves current game state for a session. Creates GameStateUpdateDTO with all active
+     * entities.
      *
      * @param sessionId unique identifier of the game session
      * @return GameStateUpdateDTO containing complete game state
-     * @throws ValidationException      if sessionId is null or blank
+     * @throws ValidationException if sessionId is null or blank
      * @throws SessionNotFoundException if the session does not exist
      */
     public GameStateUpdateDTO getGameState(String sessionId) {
@@ -207,26 +206,19 @@ public class GameFacadeService {
 
         GameSession session = gameSessionService.getSession(sessionId);
 
-        return GameStateUpdateDTO.builder()
-                .sessionId(sessionId)
-                .players(session.getPlayers().stream()
-                        .map(this::mapPlayerToDTO)
-                        .toList())
-                .bombs(session.getActiveBombs().stream()
-                        .map(this::mapBombToDTO)
-                        .toList())
-                .powerUps(session.getAvailablePowerUps().stream()
-                        .map(this::mapPowerUpToDTO)
-                        .toList())
-                .timestamp(System.currentTimeMillis())
-                .build();
+        return GameStateUpdateDTO.builder().sessionId(sessionId)
+                .players(session.getPlayers().stream().map(this::mapPlayerToDTO).toList())
+                .bombs(session.getActiveBombs().stream().map(this::mapBombToDTO).toList())
+                .powerUps(
+                        session.getAvailablePowerUps().stream().map(this::mapPowerUpToDTO).toList())
+                .timestamp(System.currentTimeMillis()).build();
     }
 
     /**
      * Schedules bomb explosion and handles explosion logic.
      *
      * @param sessionId session identifier
-     * @param bomb      bomb to schedule
+     * @param bomb bomb to schedule
      */
     private void scheduleBombExplosion(Bomb bomb) {
         String bombId = bomb.getId().toString();
@@ -236,43 +228,44 @@ public class GameFacadeService {
     }
 
     /**
-     * Processes bomb explosion and handles damage to players.
+     * Processes bomb explosion and handles damage to players. Called by BombService scheduler when
+     * bomb timer expires.
      *
      * @param sessionId session identifier
-     * @param bomb      exploding bomb
+     * @param bomb exploding bomb
      */
     private void processBombExplosion(String sessionId, Bomb bomb) {
         String bombId = bomb.getId().toString();
 
-        List<Point> affectedTiles = bombService.explodeBomb(bombId);
+        List<Point> affectedTiles =
+                collisionService.handleBombExplosion(sessionId, bombId, bomb.getRange());
 
         Point bombPosition = new Point(bomb.getPosX(), bomb.getPosY());
         tileService.markBomb(sessionId, bombPosition, false);
 
         GameSession session = gameSessionService.getSession(sessionId);
 
-        List<Player> affectedPlayers = session.getPlayers().stream()
-                .filter(player -> {
-                    Point playerPos = new Point(player.getPosX(), player.getPosY());
-                    return affectedTiles.contains(playerPos);
-                })
-                .toList();
+        List<String> affectedPlayerIds =
+                gameSessionService.getAffectedPlayers(sessionId, affectedTiles);
 
-        for (Player player : affectedPlayers) {
+        for (String playerId : affectedPlayerIds) {
+            Player player = session.getPlayers().stream()
+                    .filter(p -> p.getId().toString().equals(playerId)).findFirst().orElse(null);
+
+            if (player == null) {
+                continue;
+            }
+
             if (!player.hasActiveShield()) {
                 player.takeDamage(1);
 
                 if (!player.isAlive()) {
-                    handlePlayerDeath(sessionId, null, player.getId().toString());
+                    handlePlayerDeath(sessionId, null, playerId);
                 }
             }
         }
 
         session.getActiveBombs().remove(bomb);
-
-        List<String> affectedPlayerIds = affectedPlayers.stream()
-                .map(p -> p.getId().toString())
-                .toList();
 
         publishBombExplodedEvent(sessionId, bombId, affectedTiles, affectedPlayerIds);
         publishGameStateChangedEvent(sessionId);
@@ -282,8 +275,8 @@ public class GameFacadeService {
      * Handles player death and updates kill/death counters.
      *
      * @param sessionId session identifier
-     * @param killerId  killer player ID (nullable)
-     * @param victimId  victim player ID
+     * @param killerId killer player ID (nullable)
+     * @param victimId victim player ID
      */
     private void handlePlayerDeath(String sessionId, String killerId, String victimId) {
         playerService.incrementDeaths(victimId);
@@ -298,75 +291,56 @@ public class GameFacadeService {
     /**
      * Detects power-up at player's position.
      *
-     * @param session  game session
-     * @param player   player to check
+     * @param session game session
+     * @param player player to check
      * @param position position to check
      * @return PowerUp if found, null otherwise
      */
     private PowerUp detectAndCollectPowerUp(GameSession session, Point position) {
         return session.getAvailablePowerUps().stream()
                 .filter(pu -> pu.getPosX() == position.x && pu.getPosY() == position.y)
-                .filter(pu -> !pu.isExpired())
-                .findFirst()
-                .orElse(null);
+                .filter(pu -> !pu.isExpired()).findFirst().orElse(null);
     }
 
     /**
      * Finds player in session by ID.
      *
-     * @param session  game session
+     * @param session game session
      * @param playerId player identifier
      * @return Player instance
      * @throws PlayerNotFoundException if player not found in session
      */
     private Player findPlayerInSession(GameSession session, String playerId) {
-        return session.getPlayers().stream()
-                .filter(p -> p.getId().toString().equals(playerId))
-                .findFirst()
-                .orElseThrow(() -> new PlayerNotFoundException(playerId, session.getSessionId().toString()));
+        return session.getPlayers().stream().filter(p -> p.getId().toString().equals(playerId))
+                .findFirst().orElseThrow(() -> new PlayerNotFoundException(playerId,
+                        session.getSessionId().toString()));
     }
 
     /**
      * Maps Player entity to PlayerDTO.
      */
     private PlayerDTO mapPlayerToDTO(Player player) {
-        return PlayerDTO.builder()
-                .id(player.getId().toString())
-                .username(player.getUsername())
-                .posX(player.getPosX())
-                .posY(player.getPosY())
-                .lifeCount(player.getLifeCount())
-                .status(player.getStatus())
-                .kills(player.getKills())
-                .deaths(player.getDeaths())
-                .hasShield(player.hasActiveShield())
-                .build();
+        return PlayerDTO.builder().id(player.getId().toString()).username(player.getUsername())
+                .posX(player.getPosX()).posY(player.getPosY()).lifeCount(player.getLifeCount())
+                .status(player.getStatus()).kills(player.getKills()).deaths(player.getDeaths())
+                .hasShield(player.hasActiveShield()).build();
     }
 
     /**
      * Maps Bomb entity to BombDTO.
      */
     private BombDTO mapBombToDTO(Bomb bomb) {
-        return BombDTO.builder()
-                .id(bomb.getId().toString())
-                .ownerId(bomb.getId().toString())
-                .posX(bomb.getPosX())
-                .posY(bomb.getPosY())
-                .range(bomb.getRange())
-                .timeToExplode(bomb.getTimeUntilExplosion())
-                .build();
+        return BombDTO.builder().id(bomb.getId().toString()).ownerId(bomb.getId().toString())
+                .posX(bomb.getPosX()).posY(bomb.getPosY()).range(bomb.getRange())
+                .timeToExplode(bomb.getTimeUntilExplosion()).build();
     }
 
     /**
      * Maps PowerUp entity to PowerUpDTO.
      */
     private PowerUpDTO mapPowerUpToDTO(PowerUp powerUp) {
-        return PowerUpDTO.builder()
-                .id(powerUp.getId().toString())
-                .type(powerUp.getType())
-                .posX(powerUp.getPosX())
-                .posY(powerUp.getPosY())
-                .build();
+        return PowerUpDTO.builder().id(powerUp.getId().toString()).type(powerUp.getType())
+                .posX(powerUp.getPosX()).posY(powerUp.getPosY()).build();
     }
 
     /**
@@ -390,16 +364,18 @@ public class GameFacadeService {
      */
     private void publishBombExplodedEvent(String sessionId, String bombId,
             List<Point> affectedTiles, List<String> affectedPlayers) {
-        BombExplodedEvent event = BombExplodedEvent.of(sessionId, bombId, affectedTiles, affectedPlayers);
+        BombExplodedEvent event =
+                BombExplodedEvent.of(sessionId, bombId, affectedTiles, affectedPlayers);
         eventPublisher.publishEvent(event);
     }
 
     /**
      * Publishes PowerUpCollectedEvent.
      */
-    private void publishPowerUpCollectedEvent(String sessionId, String playerId,
-            String powerUpId, PowerUpEffect effect) {
-        PowerUpCollectedEvent event = PowerUpCollectedEvent.of(sessionId, playerId, powerUpId, effect);
+    private void publishPowerUpCollectedEvent(String sessionId, String playerId, String powerUpId,
+            PowerUpEffect effect) {
+        PowerUpCollectedEvent event =
+                PowerUpCollectedEvent.of(sessionId, playerId, powerUpId, effect);
         eventPublisher.publishEvent(event);
     }
 

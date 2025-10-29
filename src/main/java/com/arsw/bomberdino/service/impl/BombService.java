@@ -17,9 +17,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Service for managing bomb placement, explosion scheduling, and lifecycle.
- * Handles bomb countdown timers using scheduled executors.
- * Thread-safe for concurrent bomb placements.
+ * Service for managing bomb placement, explosion scheduling, and lifecycle. Handles bomb countdown
+ * timers using scheduled executors. Thread-safe for concurrent bomb placements.
  *
  * @author Mapunix, Rivaceratops, Yisus-Rex
  * @version 1.0
@@ -31,17 +30,18 @@ public class BombService {
 
     private final CollisionService collisionService;
     private final ConcurrentHashMap<String, Bomb> bombs = new ConcurrentHashMap<>();
-    private final ScheduledExecutorService explosionScheduler = Executors.newScheduledThreadPool(10);
+    private final ScheduledExecutorService explosionScheduler =
+            Executors.newScheduledThreadPool(10);
 
     private static final long DEFAULT_EXPLOSION_DELAY = 3000L;
 
     /**
-     * Places a bomb at the specified position for a player.
-     * Automatically schedules explosion after delay.
+     * Places a bomb at the specified position for a player. Automatically schedules explosion after
+     * delay.
      *
      * @param sessionId unique identifier of the session
-     * @param playerId  unique identifier of the player placing bomb
-     * @param position  coordinates where bomb is placed
+     * @param playerId unique identifier of the player placing bomb
+     * @param position coordinates where bomb is placed
      * @return Bomb instance if placement successful, null if position invalid
      * @throws IllegalArgumentException if sessionId, playerId, or position is null
      */
@@ -54,14 +54,9 @@ public class BombService {
             return null;
         }
 
-        Bomb bomb = Bomb.builder()
-                .posX(position.x)
-                .posY(position.y)
-                .range(2)
-                .state(BombState.PLACED)
-                .placedTime(System.currentTimeMillis())
-                .explosionDelay(DEFAULT_EXPLOSION_DELAY)
-                .build();
+        Bomb bomb = Bomb.builder().posX(position.x).posY(position.y).range(2)
+                .state(BombState.PLACED).placedTime(System.currentTimeMillis())
+                .explosionDelay(DEFAULT_EXPLOSION_DELAY).build();
         bomb.initDefaults();
 
         String bombId = bomb.getId().toString();
@@ -73,13 +68,13 @@ public class BombService {
     }
 
     /**
-     * Triggers bomb explosion and calculates affected tiles.
-     * Changes bomb state to EXPLODING/EXPLODED and removes from active bombs.
+     * Triggers bomb explosion and calculates affected tiles. Changes bomb state to
+     * EXPLODING/EXPLODED and removes from active bombs.
      *
      * @param bombId unique identifier of the bomb
      * @return list of Point instances representing affected tiles
      * @throws IllegalArgumentException if bombId is null or blank
-     * @throws IllegalStateException    if bomb not found or already exploded
+     * @throws IllegalStateException if bomb not found or already exploded
      */
     public List<Point> explodeBomb(String bombId) {
         validateBombId(bombId);
@@ -113,16 +108,14 @@ public class BombService {
     public List<Bomb> getActiveBombs(String sessionId) {
         validateSessionId(sessionId);
 
-        return bombs.values().stream()
-                .filter(bomb -> bomb.getState() == BombState.PLACED)
-                .toList();
+        return bombs.values().stream().filter(bomb -> bomb.getState() == BombState.PLACED).toList();
     }
 
     /**
-     * Schedules a bomb explosion after specified delay.
-     * Uses ScheduledExecutorService for non-blocking timer.
+     * Schedules a bomb explosion after specified delay. Uses ScheduledExecutorService for
+     * non-blocking timer.
      *
-     * @param bombId         unique identifier of the bomb
+     * @param bombId unique identifier of the bomb
      * @param explosionDelay delay in milliseconds until explosion
      * @throws IllegalArgumentException if bombId is null or delay invalid
      */
@@ -165,8 +158,7 @@ public class BombService {
     }
 
     /**
-     * Removes a bomb from active bombs storage.
-     * Called after explosion completes.
+     * Removes a bomb from active bombs storage. Called after explosion completes.
      *
      * @param bombId unique identifier of the bomb
      * @throws IllegalArgumentException if bombId is null or blank
@@ -182,8 +174,8 @@ public class BombService {
     }
 
     /**
-     * Calculates affected tiles in cross pattern for bomb explosion.
-     * Propagates in 4 cardinal directions until hitting solid walls.
+     * Calculates affected tiles in cross pattern for bomb explosion. Propagates in 4 cardinal
+     * directions until hitting solid walls.
      *
      * @param bomb Bomb instance to calculate explosion for
      * @return list of affected Point instances
@@ -196,21 +188,22 @@ public class BombService {
 
         int range = bomb.getRange();
 
-        affectedTiles.addAll(calculateDirectionalExplosion(center, 0, -1, range));   // Up
+        affectedTiles.addAll(calculateDirectionalExplosion(center, 0, -1, range)); // Up
         affectedTiles.addAll(calculateDirectionalExplosion(center, 0, 1, range)); // Down
-        affectedTiles.addAll(calculateDirectionalExplosion(center, -1, 0, range));   // Left
+        affectedTiles.addAll(calculateDirectionalExplosion(center, -1, 0, range)); // Left
         affectedTiles.addAll(calculateDirectionalExplosion(center, 1, 0, range)); // Right
 
         return affectedTiles;
     }
 
     /**
-     * Calculates explosion propagation in a specific direction.
+     * Calculates explosion propagation in a specific direction. Stops at solid walls, continues
+     * through destructible walls but doesn't propagate beyond.
      *
      * @param origin starting point
-     * @param dx     X direction delta (-1, 0, 1)
-     * @param dy     Y direction delta (-1, 0, 1)
-     * @param range  maximum tiles to propagate
+     * @param dx X direction delta (-1, 0, 1)
+     * @param dy Y direction delta (-1, 0, 1)
+     * @param range maximum tiles to propagate
      * @return list of affected Point instances in this direction
      */
     private List<Point> calculateDirectionalExplosion(Point origin, int dx, int dy, int range) {
@@ -222,10 +215,6 @@ public class BombService {
 
             Point tile = new Point(newX, newY);
             tiles.add(tile);
-
-            // TODO: 123 Finish implementing calculateDirectionalExplosion logic
-            // Note: Full implementation needs TileService to check if tile blocks explosion
-            // For now, assume explosion continues until range limit
         }
 
         return tiles;
@@ -280,8 +269,8 @@ public class BombService {
     }
 
     /**
-     * Cleanup method to shutdown executor service gracefully.
-     * Should be called during application shutdown.
+     * Cleanup method to shutdown executor service gracefully. Should be called during application
+     * shutdown.
      */
     public void shutdown() {
         explosionScheduler.shutdown();

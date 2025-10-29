@@ -25,8 +25,8 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
- * REST controller for game room management operations.
- * Handles room creation, joining, listing, and player disconnection.
+ * REST controller for game room management operations. Handles room creation, joining, listing, and
+ * player disconnection.
  *
  * @author Mapunix, Rivaceratops, Yisus-Rex
  * @version 1.0
@@ -43,47 +43,34 @@ public class GameController {
     private final GameSessionService gameSessionService;
 
     /**
-     * Creates a new game room.
-     * Initializes room with host player and configuration.
+     * Creates a new game room. Initializes room with host player and configuration.
      *
      * @param request CreateRoomRequestDTO with room configuration
      * @return ResponseEntity with GameRoomDTO containing room details
      */
     @PostMapping("/rooms")
-    public ResponseEntity<GameRoomDTO> createRoom(@Valid @RequestBody CreateRoomRequestDTO request) {
-        logger.info("Creating new room: {} (maxPlayers: {}, private: {})",
-                request.getRoomName(), request.getMaxPlayers(), request.isPrivate());
-
+    public ResponseEntity<GameRoomDTO> createRoom(
+            @Valid @RequestBody CreateRoomRequestDTO request) {
         try {
             UUID roomId = UUID.randomUUID();
             String roomIdStr = roomId.toString();
 
-            GameRoom room = GameRoom.builder()
-                    .roomId(roomId)
-                    .name(request.getRoomName())
-                    .roomCode(GameRoom.generateRoomCode())
-                    .hostUserId(UUID.randomUUID())
-                    .playerIds(new ArrayList<>())
-                    .maxPlayers(request.getMaxPlayers())
-                    .isPrivate(request.isPrivate())
-                    .status(GameStatus.WAITING)
-                    .createdAt(LocalDateTime.now())
-                    .password(request.getPassword())
-                    .build();
+            GameRoom room = GameRoom.builder().roomId(roomId).name(request.getRoomName())
+                    .roomCode(GameRoom.generateRoomCode()).hostUserId(UUID.randomUUID())
+                    .playerIds(new ArrayList<>()).maxPlayers(request.getMaxPlayers())
+                    .isPrivate(request.isPrivate()).status(GameStatus.WAITING)
+                    .createdAt(LocalDateTime.now()).password(request.getPassword()).build();
 
-            GameSession session = gameSessionService.createSession(roomIdStr, request.getMaxPlayers());
+            GameSession session =
+                    gameSessionService.createSession(roomIdStr, request.getMaxPlayers());
 
-            GameRoomDTO roomDTO = GameRoomDTO.builder()
-                    .roomId(roomIdStr)
-                    .roomName(room.getName())
-                    .roomCode(room.getRoomCode())
-                    .status(room.getStatus())
-                    .currentPlayers(room.getPlayerIds().size())
-                    .maxPlayers(room.getMaxPlayers())
-                    .isPrivate(room.isPrivate())
-                    .build();
+            GameRoomDTO roomDTO = GameRoomDTO.builder().roomId(roomIdStr).roomName(room.getName())
+                    .roomCode(room.getRoomCode()).status(room.getStatus())
+                    .currentPlayers(room.getPlayerIds().size()).maxPlayers(room.getMaxPlayers())
+                    .isPrivate(room.isPrivate()).build();
 
-            logger.info("Room created successfully: {} (session: {})", roomIdStr, session.getSessionId());
+            logger.info("Room created successfully: {} (session: {})", roomIdStr,
+                    session.getSessionId());
 
             return ResponseEntity.status(HttpStatus.CREATED).body(roomDTO);
 
@@ -97,23 +84,24 @@ public class GameController {
     }
 
     /**
-     * Allows a player to join an existing room.
-     * Validates room availability and password if private.
+     * Allows a player to join an existing room. Validates room availability and password if
+     * private.
      *
      * @param request JoinRoomRequestDTO with room and player details
      * @return ResponseEntity with GameRoomDTO containing updated room state
      */
     @PostMapping("/rooms/join")
     public ResponseEntity<GameRoomDTO> joinRoom(@Valid @RequestBody JoinRoomRequestDTO request) {
-        logger.info("Player {} attempting to join room {}", request.getPlayerId(), request.getRoomId());
+        logger.info("Player {} attempting to join room {}", request.getPlayerId(),
+                request.getRoomId());
 
         try {
             String sessionId = request.getRoomId();
             GameSession session = gameSessionService.getSession(sessionId);
 
             if (session.getStatus() != GameStatus.WAITING) {
-                logger.warn("Cannot join room {} - game already started (status: {})",
-                        sessionId, session.getStatus());
+                logger.warn("Cannot join room {} - game already started (status: {})", sessionId,
+                        session.getStatus());
                 throw new IllegalStateException("Cannot join room after game started");
             }
 
@@ -126,15 +114,10 @@ public class GameController {
             Point spawnPoint = availableSpawnPoints.get(0);
             gameSessionService.addPlayer(sessionId, request.getPlayerId(), spawnPoint);
 
-            GameRoomDTO roomDTO = GameRoomDTO.builder()
-                    .roomId(sessionId)
-                    .roomName("Room_" + sessionId.substring(0, 8))
-                    .roomCode(request.getRoomId())
-                    .status(session.getStatus())
-                    .currentPlayers(session.getPlayers().size())
-                    .maxPlayers(4)
-                    .isPrivate(false)
-                    .build();
+            GameRoomDTO roomDTO = GameRoomDTO.builder().roomId(sessionId)
+                    .roomName("Room_" + sessionId.substring(0, 8)).roomCode(request.getRoomId())
+                    .status(session.getStatus()).currentPlayers(session.getPlayers().size())
+                    .maxPlayers(4).isPrivate(false).build();
 
             logger.info("Player {} joined room {} successfully", request.getPlayerId(), sessionId);
 
@@ -153,8 +136,7 @@ public class GameController {
     }
 
     /**
-     * Retrieves all rooms matching a specific status.
-     * Used for lobby listing and room browser.
+     * Retrieves all rooms matching a specific status. Used for lobby listing and room browser.
      *
      * @param status GameStatus to filter by
      * @return ResponseEntity with list of GameRoomDTO
@@ -166,17 +148,12 @@ public class GameController {
         try {
             List<GameSession> sessions = gameSessionService.getSessionsByStatus(status);
 
-            List<GameRoomDTO> roomDTOs = sessions.stream()
-                    .map(session -> GameRoomDTO.builder()
-                            .roomId(session.getSessionId().toString())
-                            .roomName("Room_" + session.getSessionId().toString().substring(0, 8))
-                            .roomCode(session.getSessionId().toString().substring(0, 6).toUpperCase())
-                            .status(session.getStatus())
-                            .currentPlayers(session.getPlayers().size())
-                            .maxPlayers(4)
-                            .isPrivate(false)
-                            .build())
-                    .collect(Collectors.toList());
+            List<GameRoomDTO> roomDTOs = sessions.stream().map(session -> GameRoomDTO.builder()
+                    .roomId(session.getSessionId().toString())
+                    .roomName("Room_" + session.getSessionId().toString().substring(0, 8))
+                    .roomCode(session.getSessionId().toString().substring(0, 6).toUpperCase())
+                    .status(session.getStatus()).currentPlayers(session.getPlayers().size())
+                    .maxPlayers(4).isPrivate(false).build()).collect(Collectors.toList());
 
             logger.info("Found {} rooms with status {}", roomDTOs.size(), status);
 
@@ -192,16 +169,14 @@ public class GameController {
     }
 
     /**
-     * Removes a player from a room.
-     * Handles graceful disconnection and lobby cleanup.
+     * Removes a player from a room. Handles graceful disconnection and lobby cleanup.
      *
      * @param sessionId session identifier
-     * @param playerId  player identifier to remove
+     * @param playerId player identifier to remove
      * @return ResponseEntity with no content on success
      */
     @DeleteMapping("/rooms/{sessionId}/players/{playerId}")
-    public ResponseEntity<Void> leaveRoom(
-            @PathVariable String sessionId,
+    public ResponseEntity<Void> leaveRoom(@PathVariable String sessionId,
             @PathVariable String playerId) {
 
         logger.info("Player {} leaving room {}", playerId, sessionId);

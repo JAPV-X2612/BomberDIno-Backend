@@ -4,7 +4,6 @@ import com.arsw.bomberdino.model.dto.response.PointDTO;
 
 import java.awt.Point;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Mapper utility for converting between java.awt.Point and PointDTO. Centralizes point conversion

@@ -17,12 +17,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 /**
- * Service for managing game sessions lifecycle and state.
- * Handles session creation, player management, and state transitions.
- * Thread-safe for concurrent access from multiple players.
+ * Service for managing game sessions lifecycle and state. Handles session creation, player
+ * management, and state transitions. Thread-safe for concurrent access from multiple players.
  *
  * @author Mapunix, Rivaceratops, Yisus-Rex
  * @version 1.0
@@ -36,8 +34,7 @@ public class GameSessionService {
     private final GameMapService gameMapService;
 
     /**
-     * In-memory storage for active game sessions.
-     * Key: sessionId, Value: GameSession
+     * In-memory storage for active game sessions. Key: sessionId, Value: GameSession
      */
     private final ConcurrentHashMap<String, GameSession> sessions = new ConcurrentHashMap<>();
 
@@ -45,13 +42,13 @@ public class GameSessionService {
     private static final int DEFAULT_ROUND_DURATION = 180;
 
     /**
-     * Creates a new game session from a room.
-     * Initializes game map and tile service for the session.
+     * Creates a new game session from a room. Initializes game map and tile service for the
+     * session.
      *
-     * @param roomId     unique identifier of the room creating this session
+     * @param roomId unique identifier of the room creating this session
      * @param maxPlayers maximum number of players allowed
      * @return newly created GameSession instance
-     * @throws ValidationException   if roomId is null/blank or maxPlayers invalid
+     * @throws ValidationException if roomId is null/blank or maxPlayers invalid
      * @throws IllegalStateException if session already exists for room
      */
     public GameSession createSession(String roomId, int maxPlayers) {
@@ -65,16 +62,10 @@ public class GameSessionService {
         GameMap map = gameMapService.createMap(roomId, 13, 13);
         tileService.initializeTiles(roomId, map);
 
-        GameSession session = GameSession.builder()
-                .sessionId(UUID.randomUUID())
-                .status(GameStatus.WAITING)
-                .map(map)
-                .players(new ArrayList<>())
-                .activeBombs(new ArrayList<>())
-                .activeExplosions(new ArrayList<>())
-                .availablePowerUps(new ArrayList<>())
-                .roundDuration(DEFAULT_ROUND_DURATION)
-                .build();
+        GameSession session = GameSession.builder().sessionId(UUID.randomUUID())
+                .status(GameStatus.WAITING).map(map).players(new ArrayList<>())
+                .activeBombs(new ArrayList<>()).activeExplosions(new ArrayList<>())
+                .availablePowerUps(new ArrayList<>()).roundDuration(DEFAULT_ROUND_DURATION).build();
 
         sessions.put(roomId, session);
 
@@ -82,11 +73,10 @@ public class GameSessionService {
     }
 
     /**
-     * Starts a game session.
-     * Transitions status to IN_PROGRESS and initializes start time.
+     * Starts a game session. Transitions status to IN_PROGRESS and initializes start time.
      *
      * @param sessionId unique identifier of the session
-     * @throws ValidationException   if sessionId is null or blank
+     * @throws ValidationException if sessionId is null or blank
      * @throws IllegalStateException if session not found or not in valid state
      */
     public void startSession(String sessionId) {
@@ -94,8 +84,10 @@ public class GameSessionService {
 
         GameSession session = getSession(sessionId);
 
-        if (session.getStatus() != GameStatus.WAITING && session.getStatus() != GameStatus.STARTING) {
-            throw new IllegalStateException("Session must be in WAITING or STARTING status to start");
+        if (session.getStatus() != GameStatus.WAITING
+                && session.getStatus() != GameStatus.STARTING) {
+            throw new IllegalStateException(
+                    "Session must be in WAITING or STARTING status to start");
         }
 
         if (session.getPlayers().size() < 2) {
@@ -106,11 +98,10 @@ public class GameSessionService {
     }
 
     /**
-     * Ends a game session.
-     * Transitions status to FINISHED and cleans up resources.
+     * Ends a game session. Transitions status to FINISHED and cleans up resources.
      *
      * @param sessionId unique identifier of the session
-     * @throws ValidationException   if sessionId is null or blank
+     * @throws ValidationException if sessionId is null or blank
      * @throws IllegalStateException if session not found
      */
     public void endSession(String sessionId) {
@@ -124,11 +115,10 @@ public class GameSessionService {
     }
 
     /**
-     * Pauses a game session.
-     * Transitions status to PAUSED. Reserved for future implementation.
+     * Pauses a game session. Transitions status to PAUSED. Reserved for future implementation.
      *
      * @param sessionId unique identifier of the session
-     * @throws ValidationException   if sessionId is null or blank
+     * @throws ValidationException if sessionId is null or blank
      * @throws IllegalStateException if session not found or not in progress
      */
     public void pauseSession(String sessionId) {
@@ -144,12 +134,12 @@ public class GameSessionService {
     }
 
     /**
-     * Resumes a paused game session.
-     * Transitions status back to IN_PROGRESS. Reserved for future implementation.
+     * Resumes a paused game session. Transitions status back to IN_PROGRESS. Reserved for future
+     * implementation.
      *
      * @param sessionId unique identifier of the session
      * @throws IllegalArgumentException if sessionId is null or blank
-     * @throws IllegalStateException    if session not found or not paused
+     * @throws IllegalStateException if session not found or not paused
      */
     public void resumeSession(String sessionId) {
         validateSessionId(sessionId);
@@ -169,7 +159,7 @@ public class GameSessionService {
      * @param sessionId unique identifier of the session
      * @return GameSession instance
      * @throws IllegalArgumentException if sessionId is null or blank
-     * @throws IllegalStateException    if session not found
+     * @throws IllegalStateException if session not found
      */
     public GameSession getSession(String sessionId) {
         validateSessionId(sessionId);
@@ -184,16 +174,14 @@ public class GameSessionService {
     }
 
     /**
-     * Adds a player to a game session.
-     * Assigns spawn point and initializes player state.
+     * Adds a player to a game session. Assigns spawn point and initializes player state.
      *
-     * @param sessionId  unique identifier of the session
-     * @param playerId   unique identifier of the player
+     * @param sessionId unique identifier of the session
+     * @param playerId unique identifier of the player
      * @param spawnPoint initial spawn position for the player
      * @return newly created Player instance
-     * @throws ValidationException   if parameters are null or blank
-     * @throws IllegalStateException if session not found or not in waiting
-     *                               status
+     * @throws ValidationException if parameters are null or blank
+     * @throws IllegalStateException if session not found or not in waiting status
      */
     public Player addPlayer(String sessionId, String playerId, Point spawnPoint) {
         validateSessionId(sessionId);
@@ -209,21 +197,11 @@ public class GameSessionService {
             throw new IllegalStateException("Can only add players to sessions in WAITING status");
         }
 
-        Player player = Player.builder()
-                .id(UUID.fromString(playerId))
-                .username("Player_" + playerId.substring(0, 8))
-                .posX(spawnPoint.x)
-                .posY(spawnPoint.y)
-                .lifeCount(3)
-                .bombCount(1)
-                .bombRange(2)
-                .speed(1)
-                .status(PlayerStatus.ALIVE)
-                .activePowerUps(new ArrayList<>())
-                .kills(0)
-                .deaths(0)
-                .spawnPoint(spawnPoint)
-                .build();
+        Player player = Player.builder().id(UUID.fromString(playerId))
+                .username("Player_" + playerId.substring(0, 8)).posX(spawnPoint.x)
+                .posY(spawnPoint.y).lifeCount(3).bombCount(1).bombRange(2).speed(1)
+                .status(PlayerStatus.ALIVE).activePowerUps(new ArrayList<>()).kills(0).deaths(0)
+                .spawnPoint(spawnPoint).build();
         player.initDefaults();
 
         session.addPlayer(player);
@@ -233,12 +211,11 @@ public class GameSessionService {
     }
 
     /**
-     * Removes a player from a game session.
-     * Frees occupied tile and removes player from session.
+     * Removes a player from a game session. Frees occupied tile and removes player from session.
      *
      * @param sessionId unique identifier of the session
-     * @param playerId  unique identifier of the player to remove
-     * @throws ValidationException   if sessionId or playerId is null or blank
+     * @param playerId unique identifier of the player to remove
+     * @throws ValidationException if sessionId or playerId is null or blank
      * @throws IllegalStateException if session or player not found
      */
     public void removePlayer(String sessionId, String playerId) {
@@ -247,10 +224,10 @@ public class GameSessionService {
 
         GameSession session = getSession(sessionId);
 
-        Player playerToRemove = session.getPlayers().stream()
-                .filter(p -> p.getId().toString().equals(playerId))
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException("Player not found in session: " + playerId));
+        Player playerToRemove =
+                session.getPlayers().stream().filter(p -> p.getId().toString().equals(playerId))
+                        .findFirst().orElseThrow(() -> new IllegalStateException(
+                                "Player not found in session: " + playerId));
 
         Point playerPosition = new Point(playerToRemove.getPosX(), playerToRemove.getPosY());
         tileService.releaseOccupation(sessionId, playerPosition);
@@ -260,12 +237,11 @@ public class GameSessionService {
     }
 
     /**
-     * Updates the game state for a session.
-     * Processes bombs, explosions, power-ups, and win conditions.
-     * Called by game loop at fixed rate (e.g., 60 FPS).
+     * Updates the game state for a session. Processes bombs, explosions, power-ups, and win
+     * conditions. Called by game loop at fixed rate (e.g., 60 FPS).
      *
      * @param sessionId unique identifier of the session
-     * @throws ValidationException   if sessionId is null or blank
+     * @throws ValidationException if sessionId is null or blank
      * @throws IllegalStateException if session not found
      */
     public void updateGameState(String sessionId) {
@@ -282,8 +258,7 @@ public class GameSessionService {
     }
 
     /**
-     * Gets all sessions matching a specific status.
-     * Used for lobby listing and admin dashboards.
+     * Gets all sessions matching a specific status. Used for lobby listing and admin dashboards.
      *
      * @param status GameStatus to filter by
      * @return list of GameSession instances with matching status
@@ -294,14 +269,11 @@ public class GameSessionService {
             throw new ValidationException("Status cannot be null", "status");
         }
 
-        return sessions.values().stream()
-                .filter(session -> session.getStatus() == status)
-                .toList();
+        return sessions.values().stream().filter(session -> session.getStatus() == status).toList();
     }
 
     /**
-     * Removes a session and cleans up associated resources.
-     * Called when session ends or expires.
+     * Removes a session and cleans up associated resources. Called when session ends or expires.
      *
      * @param sessionId unique identifier of the session
      * @throws ValidationException if sessionId is null or blank
@@ -366,27 +338,43 @@ public class GameSessionService {
     }
 
     /**
-     * Gets list of player IDs affected by an explosion.
-     * Checks if any players occupy tiles in the explosion range.
+     * Gets list of player IDs affected by an explosion. Checks if any players occupy tiles in the
+     * explosion range.
      *
-     * @param sessionId      unique identifier of the session
+     * @param sessionId unique identifier of the session
      * @param explosionTiles list of tiles affected by explosion
      * @return list of player IDs as Strings
-     * @throws ValidationException   if sessionId or explosionTiles is null
+     * @throws IllegalArgumentException if sessionId or explosionTiles is null
      * @throws IllegalStateException if session not found
      */
     public List<String> getAffectedPlayers(String sessionId, List<Point> explosionTiles) {
         validateSessionId(sessionId);
 
         if (explosionTiles == null) {
-            throw new ValidationException("Explosion tiles list cannot be null", "explosionTiles");
+            throw new IllegalArgumentException("Explosion tiles list cannot be null");
         }
 
+        if (explosionTiles.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        GameSession session = getSession(sessionId);
         List<String> affectedPlayerIds = new ArrayList<>();
 
-        // TODO: 123 Implement getAffectedPlayers logic
-        // Note: This requires access to GameSession to iterate through players
-        // Full implementation will be coordinated with GameSessionService
+        for (Player player : session.getPlayers()) {
+            if (player.getStatus() != PlayerStatus.ALIVE) {
+                continue;
+            }
+
+            Point playerPosition = new Point(player.getPosX(), player.getPosY());
+
+            boolean isInExplosion = explosionTiles.stream()
+                    .anyMatch(tile -> tile.x == playerPosition.x && tile.y == playerPosition.y);
+
+            if (isInExplosion) {
+                affectedPlayerIds.add(player.getId().toString());
+            }
+        }
 
         return affectedPlayerIds;
     }

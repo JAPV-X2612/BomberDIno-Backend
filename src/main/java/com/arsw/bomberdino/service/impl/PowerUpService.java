@@ -8,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 
 import com.arsw.bomberdino.exception.PowerUpNotFoundException;
 import com.arsw.bomberdino.exception.ValidationException;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.awt.Point;
@@ -17,12 +16,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 /**
- * Service for power-up spawning, collection, and effect application.
- * Handles power-up lifecycle and expiration scheduling.
- * Thread-safe for concurrent power-up operations.
+ * Service for power-up spawning, collection, and effect application. Handles power-up lifecycle and
+ * expiration scheduling. Thread-safe for concurrent power-up operations.
  *
  * @author Mapunix, Rivaceratops, Yisus-Rex
  * @version 1.0
@@ -33,17 +30,18 @@ import java.util.stream.Collectors;
 public class PowerUpService {
 
     private final ConcurrentHashMap<String, PowerUp> powerUps = new ConcurrentHashMap<>();
-    private final ScheduledExecutorService expirationScheduler = Executors.newScheduledThreadPool(5);
+    private final ScheduledExecutorService expirationScheduler =
+            Executors.newScheduledThreadPool(5);
 
     private static final long DEFAULT_POWERUP_DURATION = 30000L;
 
     /**
-     * Spawns a power-up at the specified position.
-     * Automatically schedules expiration after duration.
+     * Spawns a power-up at the specified position. Automatically schedules expiration after
+     * duration.
      *
      * @param sessionId unique identifier of the session
-     * @param type      PowerUpType to spawn
-     * @param position  coordinates where power-up spawns
+     * @param type PowerUpType to spawn
+     * @param position coordinates where power-up spawns
      * @return PowerUp instance if spawn successful
      * @throws ValidationException if sessionId, type, or position is null
      */
@@ -52,14 +50,8 @@ public class PowerUpService {
         validatePowerUpType(type);
         validatePosition(position);
 
-        PowerUp powerUp = PowerUp.builder()
-                .posX(position.x)
-                .posY(position.y)
-                .type(type)
-                .value(1)
-                .spawnTime(System.currentTimeMillis())
-                .duration(DEFAULT_POWERUP_DURATION)
-                .build();
+        PowerUp powerUp = PowerUp.builder().posX(position.x).posY(position.y).type(type).value(1)
+                .spawnTime(System.currentTimeMillis()).duration(DEFAULT_POWERUP_DURATION).build();
         powerUp.initDefaults();
 
         String powerUpId = powerUp.getId().toString();
@@ -71,15 +63,15 @@ public class PowerUpService {
     }
 
     /**
-     * Applies power-up effect to a player and removes power-up.
-     * Creates PowerUpEffect DTO with type-specific parameters.
+     * Applies power-up effect to a player and removes power-up. Creates PowerUpEffect DTO with
+     * type-specific parameters.
      *
-     * @param playerId  unique identifier of the player
+     * @param playerId unique identifier of the player
      * @param powerUpId unique identifier of the power-up
      * @return PowerUpEffect describing the applied effect
-     * @throws ValidationException      if playerId or powerUpId is null
+     * @throws ValidationException if playerId or powerUpId is null
      * @throws PowerUpNotFoundException if power-up not found
-     * @throws IllegalStateException    if power-up expired
+     * @throws IllegalStateException if power-up expired
      */
     public PowerUpEffect applyPowerUpEffect(String playerId, String powerUpId) {
         validatePlayerId(playerId);
@@ -101,8 +93,7 @@ public class PowerUpService {
     }
 
     /**
-     * Removes a power-up from the session.
-     * Called after collection or expiration.
+     * Removes a power-up from the session. Called after collection or expiration.
      *
      * @param sessionId unique identifier of the session (can be null for global removal)
      * @param powerUpId unique identifier of the power-up
@@ -123,16 +114,14 @@ public class PowerUpService {
     public List<PowerUp> getActivePowerUps(String sessionId) {
         validateSessionId(sessionId);
 
-        return powerUps.values().stream()
-                .filter(powerUp -> !powerUp.isExpired())
-                .toList();
+        return powerUps.values().stream().filter(powerUp -> !powerUp.isExpired()).toList();
     }
 
     /**
-     * Schedules power-up expiration after specified timeout.
-     * Removes power-up from map if not collected.
+     * Schedules power-up expiration after specified timeout. Removes power-up from map if not
+     * collected.
      *
-     * @param powerUpId      unique identifier of the power-up
+     * @param powerUpId unique identifier of the power-up
      * @param timeoutSeconds timeout in seconds until expiration
      * @throws ValidationException if powerUpId is null or timeout invalid
      */
@@ -150,14 +139,15 @@ public class PowerUpService {
                     removePowerUp(null, powerUpId);
                 }
             } catch (Exception e) {
+                e.printStackTrace();
             }
         }, timeoutSeconds, TimeUnit.MILLISECONDS);
 
     }
 
     /**
-     * Gets a random PowerUpType for spawning.
-     * Uses PowerUpType.getRandomType() for equal probability distribution.
+     * Gets a random PowerUpType for spawning. Uses PowerUpType.getRandomType() for equal
+     * probability distribution.
      *
      * @return randomly selected PowerUpType
      */
@@ -175,11 +165,8 @@ public class PowerUpService {
         int duration = powerUp.getType().isTemporary() ? (int) (powerUp.getDuration() / 1000) : 0;
         float multiplier = 1.0f;
 
-        return PowerUpEffect.builder()
-                .type(powerUp.getType())
-                .duration(duration)
-                .multiplier(multiplier)
-                .build();
+        return PowerUpEffect.builder().type(powerUp.getType()).duration(duration)
+                .multiplier(multiplier).build();
     }
 
     /**
@@ -243,8 +230,8 @@ public class PowerUpService {
     }
 
     /**
-     * Cleanup method to shutdown executor service gracefully.
-     * Should be called during application shutdown.
+     * Cleanup method to shutdown executor service gracefully. Should be called during application
+     * shutdown.
      */
     public void shutdown() {
         expirationScheduler.shutdown();
